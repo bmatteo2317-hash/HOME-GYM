@@ -9,25 +9,33 @@ Stack: **HTML + Tailwind + Vanilla JS** · **Vercel Serverless (Node.js)** · **
 HOME-GYM/
 ├── package.json          # dipendenze (pg)
 ├── vercel.json           # routing frontend + api
-├── schema.sql            # tabelle Neon (workouts + profile)
+├── schema.sql            # tabelle Neon (workouts + profile + rooms)
 ├── .env.example          # esempio variabile DATABASE_URL
 ├── api/
-│   └── workouts.js       # GET/POST/DELETE workouts + GET/POST profile (?type=profile)
+│   └── workouts.js       # workouts + leaderboard + stanze + profilo + ?type=schema (diagnosi)
 └── public/
-    └── index.html        # intera app: Registra · Storico · Stats · Profilo
+    ├── index.html        # home + statistiche profilo + stanze
+    ├── stats.html        # statistiche generali dedicate
+    ├── rank.html         # classifiche globali (tutti gli esercizi)
+    ├── profile.html      # profilo e obiettivi
+    ├── pushups.html / abs.html / plank.html / pullups.html
+    ├── app.js            # logica condivisa
+    └── app.css           # stile iOS OLED condiviso
 ```
 
 ## API
 
 | Metodo | Endpoint | Descrizione |
 |---|---|---|
-| GET | `/api/workouts?limit=500&category=Flessioni` | lista allenamenti |
-| POST | `/api/workouts` | `{exercise_category, exercise_name, metric_type: 'reps'\|'seconds', value_count, sets, date:'YYYY-MM-DD'}` |
-| DELETE | `/api/workouts?id=123` | elimina sessione |
-| GET | `/api/workouts?type=profile` | profilo utente |
-| POST | `/api/workouts?type=profile` | `{name, weekly_goal, avatar, level}` |
+| GET | `/api/workouts` | lista serie (max 1000) |
+| POST | `/api/workouts` | `{category, variant, exercise, amount, unit: 'reps'\|'seconds', date:'YYYY-MM-DD', username, country}` |
+| DELETE | `/api/workouts?id=123` | elimina serie |
+| GET | `/api/workouts?type=leaderboard&scope=&period=&metric=volume\|pr\|streak&exercise=&room=` | classifica ordinata |
+| GET/POST | `/api/workouts?type=profile` | `{name, username, country, weekly_goal, avatar, level}` |
+| GET/POST | `/api/workouts?type=rooms` / `type=room_join` / `type=room&code=` | stanze private |
+| GET | `/api/workouts?type=schema` | diagnosi: colonne reali, conteggi, ultime 3 righe |
 
-Le tabelle vengono auto-create al primo avvio (`ensureSchema`), ma è consigliato eseguire `schema.sql` una volta su Neon.
+Le tabelle si auto-creano e auto-migrano al primo avvio (`ensureSchema`, inclusa migrazione dalle vecchissime colonne `exercise_category/...`), ma è consigliato eseguire `schema.sql` una volta su Neon.
 
 ## Deploy passo-passo
 

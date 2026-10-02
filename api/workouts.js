@@ -107,6 +107,26 @@ module.exports = async (req, res) => {
     client = await getPool().connect();
     await ensureSchema(client);
 
+    // ---------- DIAGNOSI: colonne reali + conteggi (aiuta a capire errori di colonna) ----------
+    if (type === 'schema' && req.method === 'GET') {
+      const cols = await client.query(
+        `SELECT table_name, column_name, data_type FROM information_schema.columns
+         WHERE table_name IN ('workouts','rooms','room_members','profile') ORDER BY table_name, ordinal_position`);
+      const counts = {};
+      for (const t of ['workouts', 'rooms', 'room_members', 'profile']) {
+        try {
+          const r = await client.query(`SELECT COUNT(*) AS n FROM ${t}`);
+          counts[t] = Number(r.rows[0].n);
+        } catch (e) { counts[t] = 'ERR: ' + e.message; }
+      }
+      let sample = [];
+      try {
+        const r = await client.query('SELECT id, exercise, category, variant, amount, unit, date, username FROM workouts ORDER BY id DESC LIMIT 3');
+        sample = r.rows;
+      } catch (e) { sample = 'ERR: ' + e.message; }
+      return send(res, 200, { columns: cols.rows, counts, sample });
+    }
+
     if (type === 'profile') {
       if (req.method === 'GET') {
         const { rows } = await client.query('SELECT * FROM profile WHERE id = 1');
