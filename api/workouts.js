@@ -99,10 +99,17 @@ module.exports = async (req, res) => {
         else { conds.push('(category = $' + params.length + ' OR exercise = $' + params.length + ')'); }
       }
       const { rows } = await client.query(
-        `SELECT username, MAX(country) AS country, SUM(amount) AS total,
-                MAX(amount) AS best, COUNT(*) AS entries, MAX(unit) AS unit
-         FROM workouts WHERE ${conds.join(' AND ')}
-         GROUP BY username ORDER BY total DESC LIMIT 50`,
+        `WITH f AS (SELECT * FROM workouts WHERE ${conds.join(' AND ')}),
+         agg AS (SELECT username, MAX(country) AS country, SUM(amount) AS total,
+                        MAX(amount) AS best, COUNT(*) AS entries, MAX(unit) AS unit
+                 FROM f GROUP BY username ORDER BY total DESC LIMIT 50),
+         top AS (SELECT DISTINCT ON (username) username, category AS top_category,
+                        variant AS top_variant, unit AS top_unit
+                 FROM (SELECT username, category, variant, unit, SUM(amount) AS v
+                       FROM f GROUP BY username, category, variant, unit) s
+                 ORDER BY username, v DESC)
+         SELECT agg.*, top.top_category, top.top_variant, top.top_unit
+         FROM agg LEFT JOIN top USING (username) ORDER BY total DESC`,
         params
       );
       return send(res, 200, { leaderboard: rows.map((r) => ({ ...r, total: Number(r.total) })) });
