@@ -187,16 +187,43 @@ function renderStats() {
       <p class="text-[11px] text-slate-400 mt-0.5">Vol <b class="text-slate-100">${r.vol}${u}</b> · Media <b class="text-slate-100">${(r.n ? r.vol / r.n : 0).toFixed(1)}${u}</b> · ×${r.n}</p>
       <div class="h-2.5 mt-1.5 rounded-full bg-white/10 overflow-hidden"><div class="bar h-full rounded-full" style="width:${Math.round(r.vol / maxV * 100)}%;background:linear-gradient(90deg,#6366f1,#22d3ee)"></div></div></div>`;
   }).join('');
-  const week = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(realToday().getTime() - i * 864e5), k = isoOf(d);
-    week.push({ d, v: data.filter((w) => w.date === k && ofType(w, TYPE)).reduce((s, w) => s + w.amount, 0) });
+  renderTrend();
+}
+/* Andamento: 7 giorni / 30 giorni / 12 mesi */
+let chartRange = '7d';
+function setChartRange(r) { chartRange = r; paintChartSeg(); renderStats(); }
+function paintChartSeg() {
+  document.querySelectorAll('[data-cr]').forEach((b) => b.classList.toggle('active', b.dataset.cr === chartRange));
+}
+function renderTrend() {
+  const buckets = [];
+  if (chartRange === '1y') {
+    for (let i = 11; i >= 0; i--) {
+      const dt = new Date(realToday()); dt.setDate(1); dt.setMonth(dt.getMonth() - i);
+      const y = dt.getFullYear(), m = dt.getMonth();
+      const v = data.filter((w) => {
+        if (!ofType(w, TYPE)) return false;
+        const d = new Date(w.date + 'T12:00:00');
+        return d.getFullYear() === y && d.getMonth() === m;
+      }).reduce((s, w) => s + w.amount, 0);
+      buckets.push({ label: dt.toLocaleDateString('it-IT', { month: 'short' }).replace('.', ''), v });
+    }
+  } else {
+    const n = chartRange === '30d' ? 30 : 7;
+    for (let i = n - 1; i >= 0; i--) {
+      const dt = new Date(realToday().getTime() - i * 864e5), k = isoOf(dt);
+      const v = data.filter((w) => w.date === k && ofType(w, TYPE)).reduce((s, w) => s + w.amount, 0);
+      buckets.push({ label: n === 30 ? ((n - 1 - i) % 5 === 0 ? String(dt.getDate()) : '') : dt.toLocaleDateString('it-IT', { weekday: 'narrow' }), v });
+    }
   }
-  const maxW = Math.max(1, ...week.map((x) => x.v));
-  $('weekChart').innerHTML = week.map((x) => `<div class="flex-1 flex flex-col items-center justify-end h-full gap-0.5">
+  const sub = $('chartSub');
+  if (sub) sub.textContent = chartRange === '1y' ? 'Ultimi 12 mesi' : chartRange === '30d' ? 'Ultimi 30 giorni' : 'Ultimi 7 giorni';
+  const maxW = Math.max(1, ...buckets.map((x) => x.v));
+  $('weekChart').innerHTML = buckets.map((x) => `<div class="flex-1 flex flex-col items-center justify-end h-full gap-0.5">
     <span class="text-[8px] font-bold text-slate-400">${x.v || ''}</span>
     <div class="bar w-full rounded-t-lg" style="height:${Math.max(5, Math.round(x.v / maxW * 100))}%;background:${x.v === maxW && x.v > 0 ? 'linear-gradient(180deg,#22d3ee,#6366f1)' : 'rgba(255,255,255,.15)'}"></div>
-    <span class="text-[8px] text-slate-500 font-bold">${x.d.toLocaleDateString('it-IT', { weekday: 'narrow' })}</span></div>`).join('');
+    <span class="text-[8px] text-slate-500 font-bold">${x.label}</span></div>`).join('');
+  paintChartSeg();
 }
 function renderHistory() {
   const rows = data.filter((w) => ofType(w, TYPE));

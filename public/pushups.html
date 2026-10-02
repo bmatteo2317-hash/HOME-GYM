@@ -55,7 +55,7 @@
       <div id="prGrid" class="mt-2 space-y-2"></div>
     </div>
     <div class="glass rounded-3xl p-4">
-      <h2 class="font-bold text-sm">📈 Ultimi 7 giorni</h2>
+      <div class="flex items-center justify-between"><h2 class="font-bold text-sm">📈 Andamento</h2><div class="flex gap-1"><button onclick="setChartRange('7d')" data-cr="7d" class="seg press glass rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold">7G</button><button onclick="setChartRange('30d')" data-cr="30d" class="seg press glass rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold">30G</button><button onclick="setChartRange('1y')" data-cr="1y" class="seg press glass rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold">1A</button></div></div><p id="chartSub" class="text-[11px] text-slate-500">Ultimi 7 giorni</p>
       <div id="weekChart" class="flex items-end gap-1.5 h-24 mt-2"></div>
     </div>
   </div>
@@ -108,4 +108,5 @@
 <script src="app.js"></script>
 </body>
 </html>
+
 
