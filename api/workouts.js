@@ -169,7 +169,11 @@ module.exports = async (req, res) => {
         : 'SELECT DISTINCT ON (username) username, category AS top_category, variant AS top_variant, unit AS top_unit FROM (SELECT username, category, variant, unit, SUM(amount) AS v FROM f GROUP BY username, category, variant, unit) s ORDER BY username, v DESC';
       const streakJoin = metric === 'streak' ? 'JOIN (SELECT username, COUNT(*) AS streak FROM (SELECT username, dt, dt - ROW_NUMBER() OVER (PARTITION BY username ORDER BY dt)::int AS grp FROM (SELECT username, date::date AS dt FROM f GROUP BY username, dt) d) g GROUP BY username, grp HAVING MAX(dt) >= CURRENT_DATE - 1) cur USING (username)' : '';
       const { rows } = await client.query(
-        `WITH f AS (SELECT * FROM workouts WHERE ${conds.join(' AND ')}),
+        `WITH w AS (SELECT * FROM workouts WHERE ${conds.join(' AND ')}),
+         f AS (SELECT id, exercise, amount, unit, date, username, country, created_at,
+               COALESCE(NULLIF(category,''), SPLIT_PART(exercise,' · ',1), exercise) AS category,
+               COALESCE(NULLIF(variant,''), NULLIF(SPLIT_PART(exercise,' · ',2),''), '') AS variant
+               FROM w),
          agg AS (SELECT username, MAX(country) AS country, SUM(amount) AS total, MAX(amount) AS best, COUNT(*) AS entries, MAX(unit) AS unit FROM f GROUP BY username),
          top AS (${topExpr})
          SELECT agg.*, top.top_category, top.top_variant, top.top_unit ${metric === 'streak' ? ', cur.streak' : ''}

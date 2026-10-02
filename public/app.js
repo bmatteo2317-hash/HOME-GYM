@@ -317,7 +317,7 @@ function paintRankSeg() {
   const rp = $('roomPanel'); if (rp) rp.classList.toggle('hidden', rank.scope !== 'room');
 }
 function rankRow(r, i, metric) {
-  const cat = r.top_category || TYPE, vari = r.top_variant || '';
+  const cat = r.top_category || TYPE, vari = r.top_variant || 'Generale';
   const icon = (TYPES[cat] || {}).icon || '🏋️';
   const me = r.username === profile.username ? 'me' : '';
   const unit = (r.top_unit || r.unit) === 'seconds' || cat === 'Plank' ? 's' : '';
@@ -362,8 +362,9 @@ function localRank(exercise) {
     if (exercise !== 'all' && !(k === exercise || k.startsWith(exercise + ' ·'))) return;
     const m = (map[w.username] = map[w.username] || { username: w.username, country: w.country || '', total: 0, best: 0, entries: 0, unit: w.unit, top: {}, days: {} });
     m.total += w.amount; m.best = Math.max(m.best, w.amount); m.entries++; m.days[w.date] = 1;
-    const kk = (w.category || '') + '|' + (w.variant || '');
-    m.top[kk] = (m.top[kk] || 0) + w.amount;
+    const kc = w.category || (w.exercise.includes('·') ? w.exercise.split('·')[0].trim() : w.exercise);
+    const kv = w.variant || ((w.exercise.includes('·') && w.exercise.split('·')[1].trim()) || '');
+    m.top[kc + '|' + kv] = (m.top[kc + '|' + kv] || 0) + w.amount;
   });
   const rows = Object.values(map).map((m) => {
     const tk = Object.entries(m.top).sort((a, b) => b[1] - a[1])[0]?.[0] || '|';
