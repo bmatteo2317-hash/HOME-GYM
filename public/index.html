@@ -107,26 +107,52 @@ tailwind.config = {
         <div class="grid grid-cols-2 gap-3 mt-3">
           <div>
             <label id="valueLabel" class="text-xs text-slate-300 font-semibold">Ripetizioni / serie</label>
-            <input id="inValue" type="number" min="1" max="10000" value="12"
+            <input id="inValue" type="number" min="1" max="10000" value="12" inputmode="numeric"
               class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-lg font-bold outline-none focus:border-indigo-400" />
           </div>
           <div>
             <label class="text-xs text-slate-300 font-semibold">Serie (sets)</label>
-            <input id="inSets" type="number" min="1" max="100" value="3"
+            <input id="inSets" type="number" min="1" max="100" value="3" inputmode="numeric"
               class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-lg font-bold outline-none focus:border-indigo-400" />
           </div>
         </div>
-        <div class="mt-3">
-          <label class="text-xs text-slate-300 font-semibold">Data</label>
-          <input id="inDate" type="date"
-            class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm font-semibold outline-none focus:border-indigo-400" />
+
+        <!-- ⚡ Inserimento rapido -->
+        <div class="mt-3 rounded-2xl p-3 border border-white/10" style="background:rgba(99,102,241,.07)">
+          <p class="text-[11px] uppercase tracking-widest text-slate-300 font-extrabold">⚡ Inserimento rapido <span id="quickUnit" class="text-indigo-300">reps</span></p>
+          <div class="grid grid-cols-6 gap-1.5 mt-2">
+            <button onclick="quickAdjust('value',-10)" class="press glass bubble-sm py-2.5 text-xs font-extrabold text-red-300">−10</button>
+            <button onclick="quickAdjust('value',-5)" class="press glass bubble-sm py-2.5 text-xs font-extrabold text-red-300">−5</button>
+            <button onclick="quickAdjust('value',-1)" class="press glass bubble-sm py-2.5 text-xs font-extrabold text-red-300">−1</button>
+            <button onclick="quickAdjust('value',1)" class="press glass bubble-sm py-2.5 text-xs font-extrabold text-emerald-300">+1</button>
+            <button onclick="quickAdjust('value',5)" class="press glass bubble-sm py-2.5 text-xs font-extrabold text-emerald-300">+5</button>
+            <button onclick="quickAdjust('value',10)" class="press glass bubble-sm py-2.5 text-xs font-extrabold text-emerald-300">+10</button>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 mt-1.5">
+            <button onclick="quickAdd('value',5)" class="press bubble-sm py-2 text-[11px] font-bold bg-white/5 border border-white/10">+5 ⚡</button>
+            <button onclick="quickAdd('value',10)" class="press bubble-sm py-2 text-[11px] font-bold bg-white/5 border border-white/10">+10 ⚡</button>
+            <button onclick="quickAdd('value',20)" class="press bubble-sm py-2 text-[11px] font-bold bg-cyan-400/15 border border-cyan-300/30 text-cyan-200">+20 🚀</button>
+          </div>
+          <div class="flex items-center gap-1.5 mt-2.5">
+            <span class="text-[11px] text-slate-400 font-bold shrink-0">Sets:</span>
+            <button onclick="quickAdjust('sets',-1)" class="press flex-1 glass bubble-sm py-2 text-xs font-extrabold">−1</button>
+            <button onclick="quickAdjust('sets',1)" class="press flex-1 glass bubble-sm py-2 text-xs font-extrabold text-indigo-300">+1</button>
+            <button onclick="quickSet('sets',1)" class="press flex-1 bubble-sm py-2 text-[11px] font-bold bg-white/5 border border-white/10">1</button>
+            <button onclick="quickSet('sets',3)" class="press flex-1 bubble-sm py-2 text-[11px] font-bold bg-white/5 border border-white/10">3</button>
+            <button onclick="quickSet('sets',5)" class="press flex-1 bubble-sm py-2 text-[11px] font-bold bg-white/5 border border-white/10">5</button>
+          </div>
         </div>
-        <!-- stepper rapidi -->
-        <div class="flex gap-2 mt-3">
-          <button onclick="quickAdjust('value',-1)" class="press flex-1 glass bubble-sm py-2 text-sm font-bold">−1</button>
-          <button onclick="quickAdjust('value',1)" class="press flex-1 glass bubble-sm py-2 text-sm font-bold">+1</button>
-          <button onclick="quickAdjust('value',5)" class="press flex-1 glass bubble-sm py-2 text-sm font-bold text-cyan-300">+5</button>
-          <button onclick="quickAdjust('sets',1)" class="press flex-1 glass bubble-sm py-2 text-sm font-bold text-indigo-300">+1 set</button>
+
+        <div class="mt-3 flex items-center justify-between gap-3">
+          <label class="flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer select-none">
+            <button id="dateToggle" onclick="toggleDateEdit()" aria-pressed="false"
+              class="w-11 h-6 rounded-full relative transition-all" style="background:rgba(255,255,255,.15)">
+              <span id="dateKnob" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-all"></span>
+            </button>
+            📅 <span id="dateToggleLabel">Oggi (auto)</span>
+          </label>
+          <input id="inDate" type="date" disabled
+            class="flex-1 bg-white/5 border border-white/10 rounded-2xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-indigo-400 disabled:opacity-40" />
         </div>
       </div>
 
@@ -323,6 +349,8 @@ document.addEventListener('DOMContentLoaded', () => {
   $('inDate').value = todayISO();
   $('headerDate').textContent = new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
   buildCategories(); buildVariants(); buildAvatarRow(); buildFilters();
+  $('inValue').addEventListener('input', updateSummary);
+  $('inSets').addEventListener('input', updateSummary);
   loadLocal(); renderAll();
   reloadAll();
 });
@@ -380,17 +408,47 @@ function buildVariants(){
   const isSec = info.metric === 'seconds';
   $('unitBadge').textContent = isSec ? '⏱️ secondi' : '🔁 reps';
   $('valueLabel').textContent = isSec ? 'Secondi / serie' : 'Ripetizioni / serie';
+  const q = $('quickUnit'); if (q) q.textContent = isSec ? 'secondi ⏱️' : 'reps 🔁';
   updateSummary();
 }
 function selectCategory(c){ state.category = c; state.variant = EXERCISES[c].variants[0]; buildCategories(); buildVariants(); }
 function selectVariant(v){ state.variant = v; buildVariants(); }
 function updateSummary(){
   const m = EXERCISES[state.category].metric;
-  $('selectionSummary').textContent = `${EXERCISES[state.category].icon} ${state.category} · ${state.variant} (${m==='seconds'?'sec':'reps'})`;
+  const v = $('inValue')?.value || '?', s = $('inSets')?.value || '?';
+  const unit = m==='seconds' ? 's' : 'reps';
+  $('selectionSummary').textContent = `${EXERCISES[state.category].icon} ${state.category} · ${state.variant} → ${v}${unit} × ${s} set`;
 }
 function quickAdjust(field, d){
   const el = field==='value' ? $('inValue') : $('inSets');
-  el.value = Math.max(1, (parseInt(el.value||'0',10)||0) + d);
+  const max = field==='value' ? 10000 : 100;
+  const cur = parseInt(el.value||'0',10) || 0;
+  el.value = Math.min(max, Math.max(1, cur + d));
+  bump(el);
+  updateSummary();
+}
+function quickAdd(field, d){ quickAdjust(field, d); }
+function quickSet(field, v){
+  const el = field==='value' ? $('inValue') : $('inSets');
+  el.value = v;
+  bump(el);
+  updateSummary();
+}
+function bump(el){
+  el.style.transform = 'scale(1.06)';
+  el.style.borderColor = 'rgba(99,102,241,.7)';
+  setTimeout(()=>{ el.style.transform=''; el.style.borderColor=''; }, 150);
+}
+let dateEditable = false;
+function toggleDateEdit(){
+  dateEditable = !dateEditable;
+  const t = $('dateToggle'), knob = $('dateKnob');
+  t.setAttribute('aria-pressed', dateEditable);
+  t.style.background = dateEditable ? 'linear-gradient(135deg,#6366f1,#22d3ee)' : 'rgba(255,255,255,.15)';
+  knob.style.left = dateEditable ? '22px' : '2px';
+  $('inDate').disabled = !dateEditable;
+  $('dateToggleLabel').textContent = dateEditable ? 'Modifica data' : 'Oggi (auto)';
+  if (!dateEditable) $('inDate').value = todayISO();
 }
 
 async function saveWorkout(){
