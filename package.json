@@ -1,7 +1,7 @@
 {
   "name": "home-gym-calisthenics",
-  "version": "2.0.0",
-  "description": "Web App iOS-style con Allenamento Live stile Garmin - Vercel + Neon PostgreSQL",
+  "version": "3.0.0",
+  "description": "Web App Garmin-style per calistenica - Vercel + Neon PostgreSQL",
   "main": "api/workouts.js",
   "scripts": {
     "dev": "vercel dev",
