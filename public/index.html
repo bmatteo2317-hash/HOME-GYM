@@ -12,7 +12,7 @@ body{ background:#000; color:#f1f5f9; font-family:-apple-system,"SF Pro Display"
 .glass{ background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.04)); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px); border:1px solid rgba(255,255,255,.10) }
 .touch{ min-height:56px; min-width:56px; touch-action:manipulation; user-select:none; -webkit-user-select:none }
 .var-btn.active{ background:#fff; color:#0f172a; border-color:transparent }
-.app-card.active{ border-color:transparent; background:linear-gradient(135deg,#6366f1,#22d3ee); color:#fff }
+.chip.active{ background:linear-gradient(135deg,#6366f1,#22d3ee); color:#fff; border-color:transparent }
 .tab-btn{ color:#64748b } .tab-btn.active{ color:#fff }
 .tab-btn.active .tab-icon{ background:linear-gradient(135deg,#6366f1,#22d3ee); transform:translateY(-2px) }
 .page{ display:none } .page.active{ display:block; animation:fu .3s ease }
@@ -29,12 +29,7 @@ input,select{ color-scheme:dark; font-size:16px !important }
 <main class="w-full max-w-sm mx-auto px-3 pt-4 pb-32 space-y-3" style="padding-top:calc(1rem + env(safe-area-inset-top))">
 <header class="glass rounded-3xl p-4 text-center">
   <h1 class="text-xl font-extrabold">💪 Home Gym</h1>
-  <div class="flex items-center justify-between mt-3 gap-2">
-    <button id="dayPrev" onclick="moveDay(-1)" class="arrow touch press glass rounded-2xl w-14 text-xl font-extrabold" aria-label="Giorno precedente">‹</button>
-    <div class="flex-1"><p id="dayLabel" class="font-extrabold">—</p><p id="daySub" class="text-[11px] text-slate-400">—</p></div>
-    <button id="dayNext" onclick="moveDay(1)" class="arrow touch press glass rounded-2xl w-14 text-xl font-extrabold" aria-label="Giorno successivo">›</button>
-  </div>
-  <button onclick="goToday()" class="text-[11px] font-bold text-indigo-300 mt-1">↩ Torna a oggi</button>
+  <p class="text-[11px] text-slate-400">4 mini-app · iOS OLED</p>
 </header>
 <div id="banner" class="hidden text-xs px-4 py-3 glass rounded-2xl text-amber-300"></div>
 <div id="profileCta" class="hidden glass rounded-3xl p-4 text-sm">
@@ -42,17 +37,22 @@ input,select{ color-scheme:dark; font-size:16px !important }
   <button onclick="tab('profilo')" class="press mt-2 w-full py-3 rounded-2xl font-extrabold text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">Vai al Profilo</button>
 </div>
 
-<!-- HOME: 4 sotto-app -->
+<!-- HOME: le 4 mini-app -->
 <section id="page-home" class="page active space-y-3">
   <div id="streakStrip" class="glass rounded-3xl px-4 py-3 flex items-center gap-3"></div>
-  <div class="grid grid-cols-4 gap-1.5" id="appGrid"></div>
-  <div id="subapp"></div>
+  <div id="homeGrid" class="grid grid-cols-1 gap-2"></div>
 </section>
+
+<!-- 4 PAGINE DEDICATE (una per macro-esercizio) -->
+<section id="page-app-Flessioni" class="page space-y-3" data-apppage="Flessioni"></section>
+<section id="page-app-Addominali" class="page space-y-3" data-apppage="Addominali"></section>
+<section id="page-app-Plank" class="page space-y-3" data-apppage="Plank"></section>
+<section id="page-app-Trazioni" class="page space-y-3" data-apppage="Trazioni"></section>
 
 <!-- RANK GLOBALE -->
 <section id="page-rank" class="page space-y-3">
   <div class="glass rounded-3xl p-4">
-    <h2 class="font-bold">🏆 Classifica globale</h2>
+    <h2 class="font-bold">🏆 Classifica</h2>
     <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Metrica</p>
     <div class="grid grid-cols-3 gap-2">
       <button id="mVol" onclick="setMetric('volume')" class="seg touch press glass rounded-2xl text-xs font-extrabold">📦 Volume</button>
@@ -64,11 +64,13 @@ input,select{ color-scheme:dark; font-size:16px !important }
       <button id="gGlobal" onclick="setScope('global')" class="seg touch press glass rounded-2xl text-sm font-extrabold">🌍 Mondiale</button>
       <button id="gCountry" onclick="setScope('country')" class="seg touch press glass rounded-2xl text-sm font-extrabold">🇮🇹 Stato</button>
     </div>
-    <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Periodo</p>
-    <div class="grid grid-cols-3 gap-2">
-      <button id="gToday" onclick="setPeriod('today')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Oggi</button>
-      <button id="gWeek" onclick="setPeriod('week')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Settimana</button>
-      <button id="gAll" onclick="setPeriod('all')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Sempre</button>
+    <div id="periodBlock">
+      <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Periodo</p>
+      <div class="grid grid-cols-3 gap-2">
+        <button id="gToday" onclick="setPeriod('today')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Oggi</button>
+        <button id="gWeek" onclick="setPeriod('week')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Settimana</button>
+        <button id="gAll" onclick="setPeriod('all')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Sempre</button>
+      </div>
     </div>
     <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Esercizio</p>
     <select id="rankEx" onchange="loadRank()" class="touch w-full bg-white/5 border border-white/10 rounded-2xl px-4 outline-none"></select>
@@ -104,20 +106,16 @@ input,select{ color-scheme:dark; font-size:16px !important }
 </section>
 </main>
 
-<nav class="fixed bottom-0 inset-x-0 z-20 px-2" style="padding-bottom:calc(.6rem + env(safe-area-inset-bottom))">
+<nav class="fixed bottom-0 inset-x-0 z-20 px-3" style="padding-bottom:calc(.6rem + env(safe-area-inset-bottom))">
   <div class="max-w-sm mx-auto glass flex justify-around py-2" style="border-radius:28px">
-    <button onclick="goApp('Flessioni')" data-tab="app:Flessioni" class="tab-btn flex flex-col items-center px-1.5"><span class="tab-icon touch flex items-center justify-center w-11 h-10 rounded-2xl bg-white/5 text-lg">💪</span><span class="text-[9px] font-bold">Push</span></button>
-    <button onclick="goApp('Addominali')" data-tab="app:Addominali" class="tab-btn flex flex-col items-center px-1.5"><span class="tab-icon touch flex items-center justify-center w-11 h-10 rounded-2xl bg-white/5 text-lg">🔥</span><span class="text-[9px] font-bold">Abs</span></button>
-    <button onclick="goApp('Plank')" data-tab="app:Plank" class="tab-btn flex flex-col items-center px-1.5"><span class="tab-icon touch flex items-center justify-center w-11 h-10 rounded-2xl bg-white/5 text-lg">⏱️</span><span class="text-[9px] font-bold">Plank</span></button>
-    <button onclick="goApp('Trazioni')" data-tab="app:Trazioni" class="tab-btn flex flex-col items-center px-1.5"><span class="tab-icon touch flex items-center justify-center w-11 h-10 rounded-2xl bg-white/5 text-lg">🧗</span><span class="text-[9px] font-bold">Pull</span></button>
-    <button onclick="tab('rank')" data-tab="rank" class="tab-btn flex flex-col items-center px-1.5"><span class="tab-icon touch flex items-center justify-center w-11 h-10 rounded-2xl bg-white/5 text-lg">🏆</span><span class="text-[9px] font-bold">Rank</span></button>
-    <button onclick="tab('profilo')" data-tab="profilo" class="tab-btn flex flex-col items-center px-1.5"><span class="tab-icon touch flex items-center justify-center w-11 h-10 rounded-2xl bg-white/5 text-lg">👤</span><span class="text-[9px] font-bold">Profilo</span></button>
+    <button onclick="tab('home')" data-tab="home" class="tab-btn active flex flex-col items-center px-8"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">🏠</span><span class="text-[10px] font-bold">Home</span></button>
+    <button onclick="tab('rank')" data-tab="rank" class="tab-btn flex flex-col items-center px-8"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">🏆</span><span class="text-[10px] font-bold">Rank</span></button>
+    <button onclick="tab('profilo')" data-tab="profilo" class="tab-btn flex flex-col items-center px-8"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">👤</span><span class="text-[10px] font-bold">Profilo</span></button>
   </div>
 </nav>
 <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-28 z-30 px-5 py-3 rounded-2xl font-bold text-sm opacity-0 pointer-events-none glass whitespace-nowrap">✅</div>
 
 <script>
-// 4 macro-esercizi (niente chin-up)
 const TYPES = {
   'Flessioni': { icon:'💪', unit:'reps', desc:'Push-ups', variants:['Larghe','Strette','Diamond','Classiche','Decline','Incline'] },
   'Addominali':{ icon:'🔥', unit:'reps', desc:'Abs', variants:['Bassi','Alti','Isometrici'] },
@@ -125,11 +123,13 @@ const TYPES = {
   'Trazioni':  { icon:'🧗', unit:'reps', desc:'Pull-ups', variants:['Pronate','Supine','Neutre','Wide Grip'] },
 };
 const COUNTRIES = ['Italia','Francia','Germania','Spagna','Portogallo','Regno Unito','USA','Canada','Brasile','Argentina','Australia','Giappone','Altro'];
-let app='Flessioni', variantSel={ Flessioni:'Larghe', Addominali:'Bassi', Plank:'Normale', Trazioni:'Pronate' };
+let curApp='Flessioni';
+let variantSel={ Flessioni:'Larghe', Addominali:'Bassi', Plank:'Normale', Trazioni:'Pronate' };
+let amountVal={ Flessioni:10, Addominali:10, Plank:30, Trazioni:5 };
+let miniState={ Flessioni:{scope:'global',metric:'volume',period:'week'}, Addominali:{scope:'global',metric:'volume',period:'week'}, Plank:{scope:'global',metric:'volume',period:'week'}, Trazioni:{scope:'global',metric:'volume',period:'week'} };
 let data=[], goal=100, dayOffset=0;
 let profile={ name:'Atleta', username:'', country:'Italia', weekly_goal:500, avatar:'💪', level:'Intermedio' };
 let rank={ scope:'global', period:'today', metric:'volume', exercise:'all', rows:[] };
-let mini={ scope:'global', period:'week', rows:[] };
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const isoOf=d=>d.toISOString().slice(0,10);
@@ -138,112 +138,153 @@ const selDate=()=>{ const d=realToday(); d.setDate(d.getDate()+dayOffset); retur
 const flag=c=>({Italia:'🇮🇹',Francia:'🇫🇷',Germania:'🇩🇪',Spagna:'🇪🇸',Portogallo:'🇵🇹','Regno Unito':'🇬🇧',USA:'🇺🇸',Canada:'🇨🇦',Brasile:'🇧🇷',Argentina:'🇦🇷',Australia:'🇦🇺',Giappone:'🇯🇵'}[c]||'🏳️');
 function toast(m){ const t=$('toast'); t.textContent=m; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.opacity='0',2000); }
 async function api(p,o={}){ const r=await fetch(p,{headers:{'Content-Type':'application/json'},...o}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.error||r.status); return d; }
-function tab(n){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $('page-'+n).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===n||(n==='home'&&b.dataset.tab==='app:'+app)));
+function tab(n){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=$('page-'+n); if(el) el.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
   if(n==='rank') loadRank(); window.scrollTo({top:0}); }
-function goApp(t){ app=t; document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $('page-home').classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab==='app:'+t));
-  renderHome(); window.scrollTo({top:0}); }
-/* Streak: giorni consecutivi (fino a oggi; tollerato oggi vuoto se ieri presente) */
-function calcStreak(username){
-  const set=new Set(data.filter(w=>!username||w.username===username).map(w=>w.date));
+function openApp(t){ curApp=t; document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-app-'+t).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  window.scrollTo({top:0}); loadMini(t); }
+function keyOf(w){ return (w.category&&w.variant)?(w.category+' · '+w.variant):w.exercise; }
+function ofType(w,t){ return (w.category||'')===t||(w.exercise||'').startsWith(t+' ·'); }
+/* Streak: giorni consecutivi (tollera oggi vuoto se ieri presente), opz. per tipo */
+function calcStreak(username,t){
+  const set=new Set(data.filter(w=>(!username||w.username===username)&&(!t||ofType(w,t))).map(w=>w.date));
   if(!set.size) return 0;
   let s=0; const c=realToday();
   if(!set.has(isoOf(c))) c.setDate(c.getDate()-1);
   while(set.has(isoOf(c))){ s++; c.setDate(c.getDate()-1); }
   return s;
 }
+function streakOfMap(dayMap){ let s=0; const c=realToday();
+  if(!dayMap[isoOf(c)]) c.setDate(c.getDate()-1);
+  while(dayMap[isoOf(c)]){ s++; c.setDate(c.getDate()-1); } return s; }
 
-/* --- giorni: default oggi, no futuro --- */
-function paintDay(){
+/* --- giorni: default oggi, no futuro (vale in ogni sotto-app) --- */
+function moveDay(dir){ if(dir>0&&dayOffset>=0) return toast('⛔ Non puoi andare nel futuro'); dayOffset=Math.min(0,dayOffset+dir); renderAll(); }
+function goToday(){ dayOffset=0; renderAll(); }
+function dayNavHTML(){
   const d=selDate(), iso=isoOf(d), isToday=dayOffset===0;
-  $('dayLabel').textContent=d.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
-  $('daySub').textContent=isToday?'📍 Oggi · '+iso:iso+` · ${-dayOffset}g fa`;
-  $('dayNext').disabled=isToday;
-  renderHome();
+  return `<div class="glass rounded-3xl p-4 text-center">
+    <div class="flex items-center justify-between gap-2">
+      <button onclick="moveDay(-1)" class="arrow touch press glass rounded-2xl w-14 text-xl font-extrabold" aria-label="Giorno precedente">‹</button>
+      <div class="flex-1"><p class="font-extrabold">${d.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})}</p>
+      <p class="text-[11px] text-slate-400">${isToday?'📍 Oggi · '+iso:iso}</p></div>
+      <button onclick="moveDay(1)" ${isToday?'disabled':''} class="arrow touch press glass rounded-2xl w-14 text-xl font-extrabold" aria-label="Giorno successivo">›</button>
+    </div></div>`;
 }
-function moveDay(dir){ if(dir>0&&dayOffset>=0) return toast('⛔ Non puoi andare nel futuro'); dayOffset=Math.min(0,dayOffset+dir); paintDay(); }
-function goToday(){ dayOffset=0; paintDay(); }
 
-/* --- home: 4 sotto-app --- */
-function renderAppGrid(){
-  $('appGrid').innerHTML=Object.entries(TYPES).map(([t,i])=>{
-    const tot=data.filter(w=>(w.category||'')===t||(w.exercise||'').startsWith(t+' ·')).reduce((s,w)=>s+w.amount,0);
-    return `<button onclick="goApp('${esc(t)}')" class="app-card press glass rounded-3xl p-2.5 text-center ${app===t?'active':''}">
-      <div class="text-2xl">${i.icon}</div><div class="text-[11px] font-extrabold mt-0.5">${esc(t)}</div>
-      <div class="text-[10px] font-bold opacity-70">${tot.toLocaleString('it-IT')}</div></button>`; }).join('');
-  const me=profile.username, myStreak=calcStreak(me||null);
-  const todayTot=data.filter(w=>w.date===isoOf(realToday())).reduce((s,w)=>s+w.amount,0);
-  $('streakStrip').innerHTML=`
-    <span class="text-2xl">🔥</span>
-    <div class="flex-1"><p class="font-extrabold leading-tight">${myStreak} giorni di fila</p>
-      <p class="text-[11px] text-slate-400">${me?'@'+esc(me)+' · ':''}oggi: ${todayTot} · target ${goal}</p></div>
-    <button onclick="tab('profilo')" class="press glass rounded-2xl px-3 py-2 text-xs font-bold">👤</button>`;
-}
-function pickVar(v){ variantSel[app]=v; renderHome(); }
-function step(d){ const el=$('inAmount'); if(el) el.value=Math.max(1,(parseInt(el.value||'0',10)||0)+d); }
-
-function keyOf(w){ return (w.category&&w.variant)?(w.category+' · '+w.variant):w.exercise; }
+/* --- HOME --- */
 function renderHome(){
-  renderAppGrid();
-  if(!app) app='Flessioni';
-  const info=TYPES[app], v=variantSel[app], iso=isoOf(selDate());
+  const me=profile.username, iso=isoOf(realToday());
+  const todayTot=data.filter(w=>w.date===iso).reduce((s,w)=>s+w.amount,0);
+  $('streakStrip').innerHTML=`<span class="text-2xl">🔥</span>
+    <div class="flex-1"><p class="font-extrabold leading-tight">${calcStreak(me||null)} giorni di fila</p>
+    <p class="text-[11px] text-slate-400">${me?'@'+esc(me)+' · ':''}oggi: ${todayTot} · target ${goal}</p></div>
+    <button onclick="tab('profilo')" class="press glass rounded-2xl px-3 py-2 text-xs font-bold">👤</button>`;
+  $('homeGrid').innerHTML=Object.entries(TYPES).map(([t,i])=>{
+    const rows=data.filter(w=>ofType(w,t));
+    const tot=rows.reduce((s,w)=>s+w.amount,0);
+    const pr=rows.length?Math.max(...rows.map(w=>w.amount)):0;
+    const u=i.unit==='seconds'?'s':'';
+    return `<button onclick="openApp('${esc(t)}')" class="press glass rounded-3xl p-4 flex items-center gap-3 text-left w-full">
+      <span class="text-4xl">${i.icon}</span>
+      <span class="flex-1"><span class="font-extrabold text-lg block">${esc(t)}</span>
+      <span class="text-[11px] text-slate-400">${esc(i.desc)} · ${i.variants.length} varianti</span><br>
+      <span class="text-[11px] text-slate-300">Vol <b>${tot.toLocaleString('it-IT')}${u}</b> · PR <b class="text-amber-300">${pr}${u}</b> · 🔥${calcStreak(me||null,t)}gg</span></span>
+      <span class="text-slate-500 font-extrabold">›</span></button>`; }).join('');
+}
+
+/* --- PAGINA DEDICATA per tipo --- */
+function chipsHTML(t){
+  return `<div class="flex gap-1.5 overflow-x-auto">${Object.entries(TYPES).map(([k,i])=>
+    `<button onclick="openApp('${esc(k)}')" class="chip press glass rounded-2xl px-3.5 text-xs font-extrabold whitespace-nowrap ${k===t?'active':''}" style="min-height:44px">${i.icon} ${esc(k)}</button>`).join('')}</div>`;
+}
+function renderApp(t){
+  const el=$('page-app-'+t); if(!el) return;
+  const info=TYPES[t], v=variantSel[t], iso=isoOf(selDate());
   const dayRows=data.filter(w=>w.date===iso);
   const dayTot=dayRows.reduce((s,w)=>s+w.amount,0);
   const pct=Math.min(100,Math.round(dayTot/goal*100));
+  const appDay=dayRows.filter(w=>ofType(w,t)).reduce((s,w)=>s+w.amount,0);
   const rows=Object.fromEntries(info.variants.map(x=>[x,{vol:0,n:0,pr:0}]));
-  data.filter(w=>((w.category||'')===app||(w.exercise||'').startsWith(app+' ·'))).forEach(w=>{
-    const vv=w.variant||(w.exercise.includes('·')?w.exercise.split('·')[1].trim():'?');
+  data.filter(w=>ofType(w,t)).forEach(w=>{
+    const vv=w.variant||((w.exercise||'').includes('·')?w.exercise.split('·')[1].trim():'?');
     if(!rows[vv]) rows[vv]={vol:0,n:0,pr:0};
     rows[vv].vol+=w.amount; rows[vv].n++; rows[vv].pr=Math.max(rows[vv].pr,w.amount);
   });
   const maxV=Math.max(1,...Object.values(rows).map(r=>r.vol));
   const u=info.unit==='seconds'?'s':'';
-  $('subapp').innerHTML=`
-  <div class="glass rounded-3xl p-4 space-y-3">
-    <div class="flex items-center gap-2">
-      <h2 class="font-extrabold text-lg">${info.icon} ${esc(app)}</h2>
-      <span class="text-[11px] font-extrabold text-orange-400">🔥 ${calcStreak(profile.username||null)}gg</span>
-      <span class="ml-auto text-[11px] font-bold text-slate-400">${esc(iso)}</span>
+  const week=[]; for(let i=6;i>=0;i--){ const d=new Date(realToday().getTime()-i*864e5); const k=isoOf(d);
+    week.push({ d, v:data.filter(w=>w.date===k&&ofType(w,t)).reduce((s,w)=>s+w.amount,0) }); }
+  const maxW=Math.max(1,...week.map(x=>x.v));
+  el.innerHTML=`
+    ${chipsHTML(t)}
+    <div class="glass rounded-3xl p-4 flex items-center gap-3">
+      <span class="text-4xl">${info.icon}</span>
+      <div class="flex-1"><h2 class="font-extrabold text-xl leading-tight">${esc(t)}</h2>
+      <p class="text-[11px] text-slate-400">${esc(info.desc)} · ${info.variants.length} varianti</p></div>
+      <div class="text-center"><p class="font-extrabold text-orange-400 text-lg leading-none">🔥${calcStreak(profile.username||null,t)}</p>
+      <p class="text-[9px] text-slate-500">streak ${esc(t)}</p></div>
     </div>
-    <div><div class="flex justify-between text-xs"><span>🎯 Target giornaliero</span><b class="text-emerald-300">${pct}%</b></div>
+    ${dayNavHTML()}
+    <div class="glass rounded-3xl p-4">
+      <div class="flex justify-between text-xs"><span>🎯 Target giornaliero</span><b class="text-emerald-300">${pct}%</b></div>
       <div class="h-3 mt-1 rounded-full bg-white/10 overflow-hidden"><div class="bar h-full rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#34d399,#22d3ee)"></div></div>
-      <p class="text-[11px] text-slate-400 mt-1">${dayTot}/${goal} oggi${app?` · ${esc(app)} oggi: ${dayRows.filter(w=>((w.category||'')===app||(w.exercise||'').startsWith(app+' ·'))).reduce((s,w)=>s+w.amount,0)}${u}`:''}</p></div>
-    <div><p class="text-[11px] uppercase tracking-widest text-slate-400 mb-1.5">Variante</p>
-      <div class="flex flex-wrap gap-2">${info.variants.map(x=>`<button onclick="pickVar('${esc(x)}')" class="var-btn touch press glass px-4 text-sm font-bold ${x===v?'active':''}" style="border-radius:16px;min-height:48px">${esc(x)}</button>`).join('')}</div>
-      <p class="text-[11px] font-bold text-indigo-300 mt-1.5">${info.unit==='seconds'?'⏱️ Inserisci SECONDI':'🔁 Inserisci ripetizioni'}</p></div>
-    <div class="flex items-stretch gap-2">
-      <button onclick="step(-5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-red-300">−5</button>
-      <input id="inAmount" type="number" value="${info.unit==='seconds'?30:10}" min="1" max="100000" inputmode="numeric" class="w-24 bg-white/5 border border-white/10 rounded-2xl py-3 text-2xl font-extrabold text-center outline-none" />
-      <button onclick="step(5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-emerald-300">+5</button>
+      <p class="text-[11px] text-slate-400 mt-1">${dayTot}/${goal} oggi · ${esc(t)} oggi: ${appDay}${u}</p>
     </div>
-    <div class="grid grid-cols-3 gap-2">
-      <button onclick="step(-1)" class="touch press glass rounded-2xl font-bold">−1</button>
-      <button onclick="step(1)" class="touch press glass rounded-2xl font-bold text-emerald-300">+1</button>
-      <button onclick="step(10)" class="touch press glass rounded-2xl font-bold text-emerald-300">+10</button>
+    <div class="glass rounded-3xl p-4">
+      <p class="text-[11px] uppercase tracking-widest text-slate-400 mb-1.5">Variante · ${esc(t)}</p>
+      <div class="flex flex-wrap gap-2">${info.variants.map(x=>`<button onclick="pickVar('${esc(t)}','${esc(x)}')" class="var-btn touch press glass px-4 text-sm font-bold ${x===v?'active':''}" style="border-radius:16px;min-height:48px">${esc(x)}</button>`).join('')}</div>
+      <p class="text-[11px] font-bold text-indigo-300 mt-1.5">${info.unit==='seconds'?'⏱️ Inserisci SECONDI':'🔁 Inserisci ripetizioni'}</p>
+      <div class="flex items-stretch gap-2 mt-2">
+        <button onclick="step('${esc(t)}',-5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-red-300">−5</button>
+        <input id="amt-${esc(t)}" type="number" value="${amountVal[t]|| (info.unit==='seconds'?30:10)}" min="1" max="100000" inputmode="numeric" oninput="amountVal['${esc(t)}']=this.value" class="w-24 bg-white/5 border border-white/10 rounded-2xl py-3 text-2xl font-extrabold text-center outline-none" />
+        <button onclick="step('${esc(t)}',5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-emerald-300">+5</button>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mt-2">
+        <button onclick="step('${esc(t)}',-1)" class="touch press glass rounded-2xl font-bold">−1</button>
+        <button onclick="step('${esc(t)}',1)" class="touch press glass rounded-2xl font-bold text-emerald-300">+1</button>
+        <button onclick="step('${esc(t)}',10)" class="touch press glass rounded-2xl font-bold text-emerald-300">+10</button>
+      </div>
+      <button onclick="save('${esc(t)}')" class="touch press w-full mt-3 rounded-[24px] py-4 font-extrabold text-lg text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">➕ Salva ${esc(v)}</button>
     </div>
-    <button onclick="save()" class="touch press w-full rounded-[24px] py-4 font-extrabold text-lg text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">➕ Salva ${esc(v)}</button>
-    <div><h3 class="font-bold text-sm">💪 Grafico di forza · ${esc(app)}</h3>
+    <div class="glass rounded-3xl p-4">
+      <h3 class="font-bold text-sm">💪 Grafico di forza · ${esc(t)}</h3>
       <p class="text-[11px] text-slate-500">Volume, Record Personale (PR) e media per variante</p>
       <div class="mt-2 space-y-1.5">${info.variants.map(x=>{ const r=rows[x]||{vol:0,n:0,pr:0}; const p=Math.round(r.vol/maxV*100);
         return `<div><div class="flex justify-between text-[11px]"><span class="font-bold">${esc(x)} ${x===v?'<span class="text-indigo-300">●</span>':''}</span><span class="text-slate-400">PR <b class="text-amber-300">${r.pr}${u}</b> · media ${(r.n?r.vol/r.n:0).toFixed(1)}${u}</span></div>
         <div class="h-2.5 rounded-full bg-white/10 overflow-hidden"><div class="bar h-full rounded-full" style="width:${p}%;background:${x===v?'linear-gradient(90deg,#6366f1,#22d3ee)':'rgba(255,255,255,.25)'}"></div></div>
-        <p class="text-[10px] text-slate-500">${r.vol}${u} totali · ×${r.n}</p></div>`; }).join('')}</div></div>
-    <div><div class="flex items-center justify-between"><h3 class="font-bold text-sm">🏆 Top ${esc(app)}</h3>
-      <div class="flex gap-1.5">
-        <button onclick="setMiniPeriod('today')" id="mpToday" class="seg press glass rounded-xl px-2.5 py-1.5 text-[11px] font-extrabold">Oggi</button>
-        <button onclick="setMiniPeriod('week')" id="mpWeek" class="seg press glass rounded-xl px-2.5 py-1.5 text-[11px] font-extrabold">7g</button>
-        <button onclick="setMini('global')" id="mGlobal" class="seg press glass rounded-xl px-2.5 py-1.5 text-[11px] font-extrabold">🌍</button>
-        <button onclick="setMini('country')" id="mCountry" class="seg press glass rounded-xl px-2.5 py-1.5 text-[11px] font-extrabold">🇮🇹</button>
-      </div></div>
-      <div id="miniRank" class="mt-2 space-y-1.5"><p class="text-xs text-slate-500">Caricamento…</p></div></div>
-    <div><h3 class="font-bold text-sm">🕘 Recenti · ${esc(app)} · ${esc(iso)}</h3>
-      <div class="mt-1.5 space-y-1.5">${dayRows.filter(w=>((w.category||'')===app||(w.exercise||'').startsWith(app+' ·'))).slice(0,5).map(w=>`<div class="glass px-3 py-2.5 flex justify-between text-xs" style="border-radius:14px"><span><b>${esc(w.variant||keyOf(w))}</b> · +${w.amount}${u}</span><button onclick="del(${w.id})" class="px-2 text-slate-500">✕</button></div>`).join('')||'<p class="text-[11px] text-slate-500">Niente oggi in questa app.</p>'}</div></div>
-  </div>`;
-  loadMini();
+        <p class="text-[10px] text-slate-500">${r.vol}${u} totali · ×${r.n}</p></div>`; }).join('')}</div>
+    </div>
+    <div class="glass rounded-3xl p-4">
+      <h3 class="font-bold text-sm">📈 Ultimi 7 giorni · ${esc(t)}</h3>
+      <div class="flex items-end gap-1.5 h-24 mt-2">${week.map(x=>`<div class="flex-1 flex flex-col items-center justify-end h-full gap-0.5">
+        <span class="text-[8px] font-bold text-slate-400">${x.v||''}</span>
+        <div class="bar w-full rounded-t-lg" style="height:${Math.max(5,Math.round(x.v/maxW*100))}%;background:${x.v===maxW&&x.v>0?'linear-gradient(180deg,#22d3ee,#6366f1)':'rgba(255,255,255,.15)'}"></div>
+        <span class="text-[8px] text-slate-500 font-bold">${x.d.toLocaleDateString('it-IT',{weekday:'narrow'})}</span></div>`).join('')}</div>
+    </div>
+    <div class="glass rounded-3xl p-4">
+      <div class="flex items-center justify-between"><h3 class="font-bold text-sm">🏆 Top ${esc(t)}</h3>
+        <div class="flex gap-1"><button onclick="setMini('${esc(t)}','metric','volume')" data-mm="${esc(t)}-volume" class="seg press glass rounded-xl px-2 py-1.5 text-[10px] font-extrabold">📦</button><button onclick="setMini('${esc(t)}','metric','pr')" data-mm="${esc(t)}-pr" class="seg press glass rounded-xl px-2 py-1.5 text-[10px] font-extrabold">🏆</button><button onclick="setMini('${esc(t)}','metric','streak')" data-mm="${esc(t)}-streak" class="seg press glass rounded-xl px-2 py-1.5 text-[10px] font-extrabold">🔥</button></div></div>
+      <div class="flex gap-1.5 mt-2">
+        <button onclick="setMini('${esc(t)}','scope','global')" data-ms="${esc(t)}-global" class="seg press glass rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold flex-1">🌍 Mondiale</button>
+        <button onclick="setMini('${esc(t)}','scope','country')" data-ms="${esc(t)}-country" class="seg press glass rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold flex-1">🇮🇹 Stato</button>
+      </div>
+      <div id="mini-${esc(t)}" class="mt-2 space-y-1.5"><p class="text-xs text-slate-500">Caricamento…</p></div>
+    </div>
+    <div class="glass rounded-3xl p-4">
+      <h3 class="font-bold text-sm">🕘 Recenti · ${esc(iso)}</h3>
+      <div class="mt-1.5 space-y-1.5">${dayRows.filter(w=>ofType(w,t)).slice(0,5).map(w=>`<div class="glass px-3 py-2.5 flex justify-between text-xs" style="border-radius:14px"><span><b>${esc(w.variant||keyOf(w))}</b> · +${w.amount}${u}</span><button onclick="del(${w.id})" class="px-2 text-slate-500">✕</button></div>`).join('')||'<p class="text-[11px] text-slate-500">Niente in questo giorno.</p>'}</div>
+    </div>`;
+  paintMiniSeg(t); loadMini(t);
 }
+function renderApps(){ Object.keys(TYPES).forEach(renderApp); }
+function pickVar(t,v){ variantSel[t]=v; renderApp(t); }
+function step(t,d){ amountVal[t]=Math.max(1,(parseInt($('amt-'+t).value||'0',10)||0)+d); $('amt-'+t).value=amountVal[t]; }
 
-/* --- salvataggio / storico --- */
+/* --- dati --- */
 async function reloadAll(){
   try{
     const [w,p]=await Promise.all([api('/api/workouts'),api('/api/workouts?type=profile')]);
@@ -252,30 +293,30 @@ async function reloadAll(){
     $('banner').classList.add('hidden');
     try{ localStorage.setItem('hg_w',JSON.stringify(data)); localStorage.setItem('hg_p',JSON.stringify(profile)); }catch(e){}
   }catch(e){ const b=$('banner'); b.classList.remove('hidden');
-    b.innerHTML=`⚠️ Offline: impossibile raggiungere il database (${esc(e.message)}). I dati mostrati sono locali. <button onclick="reloadAll()" class="underline font-extrabold">🔄 Riprova</button>`;
+    b.innerHTML=`⚠️ Offline: impossibile raggiungere il database (${esc(e.message)}). Dati locali. <button onclick="reloadAll()" class="underline font-extrabold">🔄 Riprova</button>`;
     try{ data=JSON.parse(localStorage.getItem('hg_w')||'[]'); profile={...profile,...JSON.parse(localStorage.getItem('hg_p')||'{}')}; }catch(e2){} }
-  syncProfileUI(); paintDay(); loadRank();
+  syncProfileUI(); renderAll();
 }
-async function save(){
+async function save(t){
   if(!profile.username){ toast('👤 Imposta username nel Profilo'); tab('profilo'); return; }
-  const info=TYPES[app], v=variantSel[app];
-  const body={ category:app, variant:v, exercise:app+' · '+v, amount:parseInt($('inAmount').value,10), unit:info.unit, date:isoOf(selDate()), username:profile.username, country:profile.country };
+  const info=TYPES[t], v=variantSel[t];
+  const body={ category:t, variant:v, exercise:t+' · '+v, amount:parseInt($('amt-'+t).value,10), unit:info.unit, date:isoOf(selDate()), username:profile.username, country:profile.country };
   if(!body.amount||body.amount<=0) return toast('❌ Valore non valido');
   try{ const r=await api('/api/workouts',{method:'POST',body:JSON.stringify(body)}); data.unshift(r.workout); toast(`✅ +${body.amount} · ${v}`); }
   catch(e){ data.unshift({id:Date.now(),...body,created_at:new Date().toISOString()}); toast('📴 Salvato in locale'); }
-  renderHome(); loadRank();
+  renderAll();
 }
 async function del(id){ if(!confirm('Eliminare?'))return;
   try{ await api('/api/workouts?id='+id,{method:'DELETE'}); }catch(e){}
-  data=data.filter(w=>w.id!==id); renderHome(); }
+  data=data.filter(w=>w.id!==id); renderAll(); }
+function renderAll(){ renderHome(); renderApps(); syncProfileUI(); }
 
-/* --- classifiche --- */
+/* --- classifiche: Volume | PR | Streak --- */
 function medal(i){ return i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'°'; }
 function setScope(s){ rank.scope=s; paintSeg(); loadRank(); }
 function setPeriod(p){ rank.period=p; paintSeg(); loadRank(); }
 function setMetric(m){ rank.metric=m; paintSeg(); loadRank(); }
-function setMini(s){ mini.scope=s; loadMini(); }
-function setMiniPeriod(p){ mini.period=p; loadMini(); }
+function setMini(t,k,v){ miniState[t][k]=v; paintMiniSeg(t); loadMini(t); }
 function paintSeg(){
   $('mVol').classList.toggle('active',rank.metric==='volume');
   $('mPr').classList.toggle('active',rank.metric==='pr');
@@ -283,22 +324,27 @@ function paintSeg(){
   $('gGlobal').classList.toggle('active',rank.scope==='global');
   $('gCountry').classList.toggle('active',rank.scope==='country');
   const dim=rank.metric==='streak';
-  ['gToday','gWeek','gAll'].forEach(id=>{ $(id).classList.toggle('active',!dim&&rank.period===id.slice(1).toLowerCase()); $(id).style.opacity=dim?'.35':'1'; });
+  $('periodBlock').style.opacity=dim?'.35':'1';
+  ['gToday','gWeek','gAll'].forEach(id=>$(id).classList.toggle('active',rank.period===id.slice(1).toLowerCase()));
   if(dim) $('gAll').classList.add('active');
-  const mg=$('mGlobal'), mc=$('mCountry');
-  if(mg){ mg.classList.toggle('active',mini.scope==='global'); mc.classList.toggle('active',mini.scope==='country'); }
-  const mt=$('mpToday'), mw=$('mpWeek');
-  if(mt){ mt.classList.toggle('active',mini.period==='today'); mw.classList.toggle('active',mini.period==='week'); }
 }
-function rankRow(r,i,exOverride){
+function paintMiniSeg(t){
+  const m=miniState[t];
+  document.querySelectorAll(`[data-mm="${t}-volume"]`).forEach(b=>b.classList.toggle('active',m.metric==='volume'));
+  document.querySelectorAll(`[data-mm="${t}-pr"]`).forEach(b=>b.classList.toggle('active',m.metric==='pr'));
+  document.querySelectorAll(`[data-mm="${t}-streak"]`).forEach(b=>b.classList.toggle('active',m.metric==='streak'));
+  document.querySelectorAll(`[data-ms="${t}-global"]`).forEach(b=>b.classList.toggle('active',m.scope==='global'));
+  document.querySelectorAll(`[data-ms="${t}-country"]`).forEach(b=>b.classList.toggle('active',m.scope==='country'));
+}
+function rankRow(r,i,exOverride,metric){
+  metric=metric||'volume';
   const cat=exOverride?.cat||r.top_category||'', vari=exOverride?.vari||r.top_variant||'';
   const icon=(TYPES[cat]||{}).icon||'🏋️';
   const me=r.username===profile.username?'me':'';
-  const m=rank.metric;
   const unit=(r.top_unit||r.unit)==='seconds'||cat==='Plank'?'s':'';
-  const score=m==='pr'?r.best+(unit||''):m==='streak'?(r.streak??0)+'🔥':Number(r.total??r.score??0).toLocaleString('it-IT');
-  const sub=m==='pr'?`vol ${Number(r.total||0)} · ×${r.entries}`
-    :m==='streak'?`vol ${Number(r.total||0)} · PR ${r.best}`
+  const score=metric==='pr'?r.best+(unit||''):metric==='streak'?(r.streak??0)+'🔥':Number(r.total??r.score??0).toLocaleString('it-IT');
+  const sub=metric==='pr'?`vol ${Number(r.total||0)} · ×${r.entries}`
+    :metric==='streak'?`vol ${Number(r.total||0)} · PR ${r.best}`
     :`🏆 max ${r.best} · ×${r.entries}`;
   const edge=i===0?'border-color:rgba(250,204,21,.6) !important':i===1?'border-color:rgba(203,213,225,.5) !important':i===2?'border-color:rgba(217,119,6,.55) !important':'';
   return `<div class="glass px-4 py-3 flex items-center gap-3 ${me}" style="border-radius:20px;${edge}">
@@ -320,19 +366,20 @@ async function loadRank(){
   try{ const r=await api('/api/workouts?type=leaderboard&'+qs); rank.rows=r.leaderboard||[]; }
   catch(e){ rank.rows=localRank(rank.scope,rank.period,rank.exercise,rank.metric); }
   const ex=rankExOf();
-  const mLabel=rank.metric==='pr'?'🏆 PR':rank.metric==='streak'?'🔥 Streak (streak attuale, periodo ignorato)':'📦 Volume';
+  const mLabel=rank.metric==='pr'?'🏆 PR':rank.metric==='streak'?'🔥 Streak (attuale)':'📦 Volume';
   $('rankList').innerHTML=`<p class="text-[11px] text-slate-400">${mLabel} · ${rank.scope==='country'?flag(profile.country)+' '+esc(profile.country):'🌍 Mondiale'}</p>`+
-    (rank.rows.length?rank.rows.map((r,i)=>rankRow(r,i,ex)).join('')
+    (rank.rows.length?rank.rows.map((r,i)=>rankRow(r,i,ex,rank.metric)).join('')
     :'<p class="text-xs text-slate-500 text-center py-4">Nessuno qui — sii il primo! 🚀</p>');
 }
-async function loadMini(){
-  if(!app) return;
-  const qs=`scope=${mini.scope}&country=${encodeURIComponent(profile.country||'Italia')}&period=${mini.period}&exercise=${encodeURIComponent(app)}`;
+async function loadMini(t){
+  const m=miniState[t];
+  const qs=`scope=${m.scope}&country=${encodeURIComponent(profile.country||'Italia')}&period=week&metric=${m.metric}&exercise=${encodeURIComponent(t)}`;
   let rows;
   try{ const r=await api('/api/workouts?type=leaderboard&'+qs); rows=r.leaderboard||[]; }
-  catch(e){ rows=localRank(mini.scope,mini.period,app); }
-  paintSeg();
-  $('miniRank').innerHTML=rows.length?rows.slice(0,5).map((r,i)=>rankRow(r,i,{cat:app,vari:r.top_variant||'—'})).join('')
+  catch(e){ rows=localRank(m.scope,'week',t,m.metric); }
+  paintMiniSeg(t);
+  const box=$('mini-'+t); if(!box) return;
+  box.innerHTML=rows.length?rows.slice(0,5).map((r,i)=>rankRow(r,i,{cat:t,vari:r.top_variant||'—'},m.metric)).join('')
     :'<p class="text-[11px] text-slate-500">Nessuno in questa mini-app — tocca a te! 💪</p>';
 }
 function localRank(scope,period,exercise,metric){
@@ -342,10 +389,7 @@ function localRank(scope,period,exercise,metric){
   data.forEach(w=>{
     if(!w.username) return;
     if(scope==='country'&&(w.country||'')!==profile.country) return;
-    if(metric!=='streak'){
-      if(period==='today'&&w.date!==today) return;
-      if(period==='week'&&w.date<weekAgo) return;
-    }
+    if(metric!=='streak'){ if(period==='today'&&w.date!==today) return; if(period==='week'&&w.date<weekAgo) return; }
     const k=(w.category&&w.variant)?w.category+' · '+w.variant:w.exercise;
     if(exercise&&exercise!=='all'){ if(exercise.includes('·')?k!==exercise:!(k===exercise||k.startsWith(exercise+' ·'))) return; }
     const m=(map[w.username]=map[w.username]||{username:w.username,country:w.country||'',total:0,best:0,entries:0,unit:w.unit,top:{},days:{}});
@@ -355,7 +399,7 @@ function localRank(scope,period,exercise,metric){
   const rows=Object.values(map).map(m=>{
     const tk=Object.entries(m.top).sort((a,b)=>b[1]-a[1])[0]?.[0]||'|';
     const [tc,tv]=tk.split('|'); m.top_category=tc; m.top_variant=tv; delete m.top;
-    m.streak=streakOf(m.days); delete m.days;
+    m.streak=streakOfMap(m.days); delete m.days;
     m.score=metric==='pr'?m.best:metric==='streak'?m.streak:m.total;
     return m;
   });
@@ -363,18 +407,12 @@ function localRank(scope,period,exercise,metric){
   if(metric==='pr') return rows.sort((a,b)=>b.best-a.best).slice(0,50);
   return rows.sort((a,b)=>b.total-a.total).slice(0,50);
 }
-function streakOf(dayMap){
-  let s=0; const c=realToday();
-  if(!dayMap[isoOf(c)]) c.setDate(c.getDate()-1);
-  while(dayMap[isoOf(c)]){ s++; c.setDate(c.getDate()-1); }
-  return s;
-}
 
 /* --- profilo --- */
 function syncProfileUI(){
   $('pfUsername').value=profile.username||''; $('pfCountry').value=profile.country||'Italia';
   $('pfName').value=profile.name||'Atleta'; $('pfGoal').value=goal;
-  $('pfNameBig').textContent=profile.name||'Atleta';
+  $('pfNameBig').textContent=profile.name||'Atleta'; $('pfAvatar').textContent=profile.avatar||'💪';
   $('pfMeta').textContent=(profile.username?'@'+profile.username+' · ':'')+flag(profile.country)+' '+(profile.country||'');
   const mine=data.filter(w=>!profile.username||w.username===profile.username);
   $('pfStreak').textContent=calcStreak(profile.username||null)+'🔥';
@@ -390,15 +428,14 @@ async function saveProfile(){
   profile={...profile,username:u,country:$('pfCountry').value,name:$('pfName').value.trim()||'Atleta',weekly_goal:goal};
   try{ const r=await api('/api/workouts?type=profile',{method:'POST',body:JSON.stringify(profile)}); profile=r.profile; toast('✅ Profilo salvato!'); }
   catch(e){ try{localStorage.setItem('hg_p',JSON.stringify(profile));}catch(e2){} toast('📴 Salvato in locale'); }
-  syncProfileUI(); renderHome();
+  syncProfileUI(); renderAll();
 }
 document.addEventListener('DOMContentLoaded',()=>{
   const opts=[{label:'all'}];
   Object.entries(TYPES).forEach(([t,i])=>{ opts.push({label:t}); i.variants.forEach(v=>opts.push({label:t+' · '+v})); });
   $('rankEx').innerHTML=opts.map(o=>`<option value="${esc(o.label)}">${o.label==='all'?'⭐ Tutti gli esercizi':esc(o.label)}</option>`).join('');
-  $('pfCountry').innerHTML=['Italia','Francia','Germania','Spagna','Portogallo','Regno Unito','USA','Canada','Brasile','Argentina','Australia','Giappone','Altro'].map(c=>`<option ${c==='Italia'?'selected':''}>${c}</option>`).join('');
+  $('pfCountry').innerHTML=COUNTRIES.map(c=>`<option ${c==='Italia'?'selected':''}>${c}</option>`).join('');
   try{ const g=parseInt(localStorage.getItem('hg_goal')||'',10); if(g>0) goal=g; }catch(e){}
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab==='app:Flessioni'));
   paintSeg(); reloadAll();
 });
 </script>
