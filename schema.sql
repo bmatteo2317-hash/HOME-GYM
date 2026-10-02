@@ -1,5 +1,5 @@
--- HOME-GYM — Schema Neon (con Classifiche Mondiale/Stato)
--- Esegui nel Neon SQL Editor (sicuro da rieseguire: IF NOT EXISTS)
+-- HOME-GYM — Schema Neon (multi-pagina + stanze private)
+-- Esegui nel Neon SQL Editor (sicuro da rieseguire)
 
 CREATE TABLE IF NOT EXISTS workouts (
   id SERIAL PRIMARY KEY,
@@ -33,3 +33,20 @@ CREATE TABLE IF NOT EXISTS profile (
 ALTER TABLE profile ADD COLUMN IF NOT EXISTS username TEXT NOT NULL DEFAULT '';
 ALTER TABLE profile ADD COLUMN IF NOT EXISTS country TEXT NOT NULL DEFAULT 'Italia';
 INSERT INTO profile (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
+-- Stanze private per classifiche tra amici
+CREATE TABLE IF NOT EXISTS rooms (
+  code TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  exercise TEXT NOT NULL DEFAULT 'all',
+  created_by TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS room_members (
+  room_code TEXT NOT NULL REFERENCES rooms(code) ON DELETE CASCADE,
+  username TEXT NOT NULL,
+  country TEXT NOT NULL DEFAULT '',
+  joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (room_code, username)
+);
+CREATE INDEX IF NOT EXISTS idx_room_members_code ON room_members(room_code);

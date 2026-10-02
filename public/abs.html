@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<title>Addominali · HOME-GYM</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="app.css" />
+</head>
+<body data-page="exercise" data-type="Addominali">
+<main class="w-full max-w-sm mx-auto px-3 pt-4 pb-32 space-y-3" style="padding-top:calc(1rem + env(safe-area-inset-top))">
+  <div class="flex items-center gap-2">
+    <a href="index.html" class="touch press glass rounded-2xl px-4 font-extrabold">‹</a>
+    <h1 class="font-extrabold text-xl">🔥 Addominali <span class="text-xs font-normal text-slate-400">Abs</span></h1>
+  </div>
+  <div id="banner" class="hidden text-xs px-4 py-3 glass rounded-2xl text-amber-300"></div>
+
+  <div id="sub-add" class="subtab active space-y-3">
+    <div class="glass rounded-3xl p-4">
+      <div class="flex items-center justify-between gap-2">
+        <button onclick="moveDay(-1)" class="arrow touch press glass rounded-2xl w-14 text-xl font-extrabold" aria-label="Giorno precedente">‹</button>
+        <div class="flex-1 text-center"><p id="dayLabel" class="font-extrabold">—</p><p id="daySub" class="text-[11px] text-slate-400">—</p></div>
+        <button id="dayNext" onclick="moveDay(1)" class="arrow touch press glass rounded-2xl w-14 text-xl font-extrabold" aria-label="Giorno successivo">›</button>
+      </div>
+    </div>
+    <div class="glass rounded-3xl p-4">
+      <p class="text-[11px] uppercase tracking-widest text-slate-400 mb-1.5">Variante · Addominali</p>
+      <div id="varGrid" class="flex flex-wrap gap-2"></div>
+      <p id="unitHint" class="text-[11px] font-bold text-indigo-300 mt-2"></p>
+      <div class="flex items-stretch gap-2 mt-2">
+        <button onclick="step(-5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-red-300">−5</button>
+        <input id="inAmount" type="number" value="12" min="1" max="100000" inputmode="numeric" class="w-24 bg-white/5 border border-white/10 rounded-2xl py-3 text-2xl font-extrabold text-center outline-none" />
+        <button onclick="step(5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-emerald-300">+5</button>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mt-2">
+        <button onclick="step(-1)" class="touch press glass rounded-2xl font-bold">−1</button>
+        <button onclick="step(1)" class="touch press glass rounded-2xl font-bold text-emerald-300">+1</button>
+        <button onclick="step(10)" class="touch press glass rounded-2xl font-bold text-emerald-300">+10</button>
+      </div>
+      <button onclick="saveEntry()" class="touch press w-full mt-3 rounded-[24px] py-4 font-extrabold text-lg text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">➕ Salva</button>
+      <p id="selInfo" class="text-center text-xs text-slate-400 mt-2"></p>
+    </div>
+  </div>
+
+  <div id="sub-stats" class="subtab space-y-3">
+    <div class="glass rounded-3xl p-4">
+      <div class="flex justify-between text-xs"><span>🎯 Target giornaliero</span><b id="goalPct" class="text-emerald-300">0%</b></div>
+      <div class="h-3 mt-1 rounded-full bg-white/10 overflow-hidden"><div id="goalBar" class="bar h-full rounded-full" style="width:0%;background:linear-gradient(90deg,#34d399,#22d3ee)"></div></div>
+      <p id="goalText" class="text-[11px] text-slate-400 mt-1"></p>
+      <p id="streakLine" class="text-[11px] font-bold text-orange-300 mt-1"></p>
+    </div>
+    <div class="glass rounded-3xl p-4">
+      <h2 class="font-bold text-sm">🏆 Record Personale · Addominali</h2>
+      <div id="prGrid" class="mt-2 space-y-2"></div>
+    </div>
+    <div class="glass rounded-3xl p-4">
+      <h2 class="font-bold text-sm">📈 Ultimi 7 giorni</h2>
+      <div id="weekChart" class="flex items-end gap-1.5 h-24 mt-2"></div>
+    </div>
+  </div>
+
+  <div id="sub-rank" class="subtab space-y-3">
+    <div class="glass rounded-3xl p-4">
+      <h2 class="font-bold">🏆 Classifica · Addominali</h2>
+      <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Metrica</p>
+      <div class="grid grid-cols-3 gap-2">
+        <button id="mVol" onclick="setMetric('volume')" class="seg touch press glass rounded-2xl text-xs font-extrabold">📦 Volume</button>
+        <button id="mPr" onclick="setMetric('pr')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🏆 PR</button>
+        <button id="mStreak" onclick="setMetric('streak')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🔥 Streak</button>
+      </div>
+      <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Ambito</p>
+      <div class="grid grid-cols-3 gap-2">
+        <button id="gGlobal" onclick="setScope('global')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🌍</button>
+        <button id="gCountry" onclick="setScope('country')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🇮🇹</button>
+        <button id="gRoom" onclick="setScope('room')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🔒</button>
+      </div>
+      <div id="periodBlock">
+        <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Periodo</p>
+        <div class="grid grid-cols-3 gap-2">
+          <button id="gToday" onclick="setPeriod('today')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Oggi</button>
+          <button id="gWeek" onclick="setPeriod('week')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Settimana</button>
+          <button id="gAll" onclick="setPeriod('all')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Sempre</button>
+        </div>
+      </div>
+      <div id="roomPanel" class="hidden mt-3"></div>
+      <div id="rankList" class="mt-3 space-y-2"></div>
+    </div>
+  </div>
+
+  <div id="sub-hist" class="subtab space-y-3">
+    <div class="glass rounded-3xl p-4">
+      <h2 class="font-bold">📜 Storico · Addominali</h2>
+      <div id="histList" class="mt-2 space-y-2"></div>
+    </div>
+  </div>
+</main>
+
+<nav class="fixed bottom-0 inset-x-0 z-20 px-3" style="padding-bottom:calc(.6rem + env(safe-area-inset-bottom))">
+  <div class="max-w-sm mx-auto glass flex justify-around py-2" style="border-radius:28px">
+    <button onclick="subtab('add')" data-sub="add" class="tab-btn active flex flex-col items-center px-4"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">➕</span><span class="text-[10px] font-bold">Inserisci</span></button>
+    <button onclick="subtab('stats')" data-sub="stats" class="tab-btn flex flex-col items-center px-4"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">📊</span><span class="text-[10px] font-bold">Stats</span></button>
+    <button onclick="subtab('rank')" data-sub="rank" class="tab-btn flex flex-col items-center px-4"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">🏆</span><span class="text-[10px] font-bold">Rank</span></button>
+    <button onclick="subtab('hist')" data-sub="hist" class="tab-btn flex flex-col items-center px-4"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">📜</span><span class="text-[10px] font-bold">Storico</span></button>
+  </div>
+</nav>
+<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-28 z-30 px-5 py-3 rounded-2xl font-bold text-sm opacity-0 pointer-events-none glass whitespace-nowrap">✅</div>
+<script src="app.js"></script>
+</body>
+</html>
+
