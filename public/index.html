@@ -2,313 +2,143 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>HOME-GYM · Attività Garmin-style</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>HOME-GYM · Mobile</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-*{ -webkit-tap-highlight-color:transparent }
-body{ background:#000; color:#f1f5f9; font-family:-apple-system,"SF Pro Display",Inter,sans-serif }
-.bg-orbs::before,.bg-orbs::after{ content:''; position:fixed; border-radius:9999px; filter:blur(90px); opacity:.32; z-index:0; pointer-events:none }
-.bg-orbs::before{ width:340px; height:340px; background:#4f46e5; top:-110px; left:-110px }
-.bg-orbs::after{ width:320px; height:320px; background:#06b6d4; bottom:70px; right:-120px }
-.glass{ background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.04)); backdrop-filter:blur(22px) saturate(160%); -webkit-backdrop-filter:blur(22px) saturate(160%); border:1px solid rgba(255,255,255,.10); box-shadow:0 8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12) }
-.cat-btn{ transition:all .22s ease } .cat-btn.active{ background:linear-gradient(135deg,#6366f1,#22d3ee); color:#fff; border-color:transparent; transform:scale(1.03) }
-.var-btn.active{ background:#fff; color:#0f172a; border-color:transparent }
-.tab-btn{ color:#64748b; transition:all .25s ease } .tab-btn.active{ color:#fff }
-.tab-btn.active .tab-icon{ background:linear-gradient(135deg,#6366f1,#22d3ee); transform:translateY(-2px) }
-.page{ display:none; animation:fu .35s ease } .page.active{ display:block }
-@keyframes fu{ from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
-@keyframes ring{ 0%{box-shadow:0 0 0 0 rgba(239,68,68,.55)} 70%{box-shadow:0 0 0 14px rgba(239,68,68,0)} 100%{box-shadow:0 0 0 0 rgba(239,68,68,0)} }
-.live-dot{ animation:ring 1.6s infinite }
-.timer-big{ font-variant-numeric:tabular-nums }
-#toast{ transition:all .3s ease } .press:active{ transform:scale(.96) }
-input,select{ color-scheme:dark }
+*{ -webkit-tap-highlight-color:transparent; box-sizing:border-box }
+html{ -webkit-text-size-adjust:100% }
+body{ background:#000; color:#f1f5f9; font-family:-apple-system,"SF Pro Display",Inter,sans-serif; min-height:100dvh; overscroll-behavior-y:contain }
+.glass{ background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.04)); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px); border:1px solid rgba(255,255,255,.10) }
+/* touch target minimo 48px, bottoni grandi da pollice */
+.touch{ min-height:56px; min-width:56px; touch-action:manipulation; user-select:none; -webkit-user-select:none }
+.touch-lg{ min-height:64px }
+.ex-btn.active{ background:linear-gradient(135deg,#6366f1,#22d3ee); color:#fff; border-color:transparent }
+#toast{ transition:all .3s ease }
+.press:active{ transform:scale(.95) }
+input{ color-scheme:dark; font-size:16px !important } /* evita zoom automatico iOS */
+.no-scrollbar::-webkit-scrollbar{ display:none } .no-scrollbar{ scrollbar-width:none }
+.sticky-save{ position:sticky; bottom:calc(.75rem + env(safe-area-inset-bottom)); z-index:20 }
 </style>
 </head>
-<body class="bg-orbs min-h-screen pb-32">
-<div class="relative z-10 max-w-md mx-auto px-4 pt-6">
+<body>
+<main class="w-full max-w-sm mx-auto px-3 pt-4 pb-28 space-y-3" style="padding-top:calc(1rem + env(safe-area-inset-top))">
 
-<header class="glass rounded-3xl p-5 flex items-center gap-4">
-  <div id="headerAvatar" class="w-14 h-14 flex items-center justify-center text-3xl shrink-0" style="border-radius:20px;background:linear-gradient(135deg,#6366f1,#22d3ee)">💪</div>
-  <div class="flex-1 min-w-0">
-    <p class="text-[11px] uppercase tracking-widest text-slate-400">Home Gym · Garmin-style</p>
-    <h1 class="text-xl font-extrabold truncate">Ciao, <span id="headerName">Atleta</span> 👋</h1>
-    <p id="headerDate" class="text-xs text-slate-400"></p>
-  </div>
-  <div class="glass px-3 py-2 text-center shrink-0" style="border-radius:20px">
-    <div class="text-lg font-extrabold text-orange-400">🔥 <span id="headerStreak">0</span></div>
-    <div class="text-[10px] text-slate-400 -mt-0.5">streak</div>
-  </div>
+<header class="glass rounded-3xl p-5 text-center">
+  <p class="text-[11px] uppercase tracking-widest text-slate-400">2 Ottobre 2026 · Mobile</p>
+  <h1 class="text-2xl font-extrabold">💪 Totali di oggi</h1>
 </header>
-<div id="statusBanner" class="hidden mt-3 text-xs px-4 py-2.5 glass text-amber-300" style="border-radius:20px"></div>
+<div id="banner" class="hidden text-xs px-4 py-3 glass rounded-2xl text-amber-300"></div>
 
-<!-- ===== TAB ATTIVITÀ ===== -->
-<section id="page-live" class="page active mt-4 space-y-4">
+<!-- INSERIMENTO -->
+<section class="glass rounded-3xl p-4">
+  <h2 class="font-bold text-base">⚡ Aggiungi</h2>
+  <div id="exGrid" class="grid grid-cols-2 gap-2 mt-2"></div>
 
-  <!-- STATO IDLE -->
-  <div id="idleCard" class="glass rounded-3xl p-5">
-    <h2 class="font-bold text-lg">⏱️ Nuova attività</h2>
-    <p class="text-xs text-slate-400 mt-0.5">Data e ora impostate in automatico dal sistema. Nessuna selezione richiesta.</p>
-    <div class="mt-3 rounded-2xl border border-white/10 p-3 text-sm" style="background:rgba(52,211,153,.07)">
-      <p class="font-bold">🕘 <span id="autoTs">—</span></p>
-      <p class="text-xs text-slate-400">Timestamp preciso fissato all'avvio (es. 2 ottobre 2026 + ora esatta).</p>
-    </div>
-    <div class="mt-3"><label class="text-xs font-semibold text-slate-300">Nome sessione (auto)</label>
-      <input id="sessName" type="text" maxlength="120" class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm font-semibold outline-none" /></div>
-    <button onclick="startActivity()" class="press w-full mt-3 py-4 rounded-[24px] font-extrabold text-lg text-white" style="background:linear-gradient(135deg,#22c55e,#22d3ee)">▶️ Avvia Attività</button>
+  <label class="block text-xs font-semibold text-slate-300 mt-4">Quantità</label>
+  <div class="flex items-stretch gap-2 mt-1">
+    <button onclick="step(-5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-red-300">−5</button>
+    <input id="inAmount" type="number" value="10" min="1" max="100000" inputmode="numeric" pattern="[0-9]*"
+      class="w-24 bg-white/5 border border-white/10 rounded-2xl py-3 text-2xl font-extrabold text-center outline-none" />
+    <button onclick="step(5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-emerald-300">+5</button>
+  </div>
+  <div class="grid grid-cols-4 gap-2 mt-2">
+    <button onclick="step(-1)" class="touch press glass rounded-2xl text-base font-bold">−1</button>
+    <button onclick="step(1)" class="touch press glass rounded-2xl text-base font-bold text-emerald-300">+1</button>
+    <button onclick="step(10)" class="touch press glass rounded-2xl text-base font-bold text-emerald-300">+10</button>
+    <button onclick="resetVal()" class="touch press glass rounded-2xl text-xs font-bold text-slate-400">Reset</button>
   </div>
 
-  <!-- STATO LAVORO -->
-  <div id="workCard" class="hidden glass rounded-3xl p-5 text-center">
-    <div class="flex items-center justify-center gap-2">
-      <span class="live-dot w-3 h-3 rounded-full bg-red-500 inline-block"></span>
-      <p class="text-xs font-extrabold tracking-widest text-red-300">LAVORO IN CORSO</p>
-    </div>
-    <p id="workClock" class="timer-big text-7xl font-extrabold mt-2">00:00</p>
-    <p id="workInfo" class="text-xs text-slate-400 mt-1"></p>
-    <button onclick="stopAndLog()" class="press w-full mt-4 py-4 rounded-[24px] font-extrabold text-lg text-white" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">⏹️ Stop &amp; Registra Serie</button>
-  </div>
-
-  <!-- STATO LOGGING (recupero in background) -->
-  <div id="logCard" class="hidden glass rounded-3xl p-5">
-    <div class="flex items-center gap-2">
-      <span class="live-dot w-3 h-3 rounded-full bg-cyan-400 inline-block"></span>
-      <h2 class="font-bold">📝 Cosa hai fatto?</h2>
-      <span id="restPill" class="ml-auto text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-cyan-400/15 text-cyan-200 border border-cyan-300/30 timer-big">😮‍💨 00:00</span>
-    </div>
-    <p class="text-xs text-slate-400">Il recupero corre in background. Ultimo lavoro: <b id="lastWork" class="text-slate-200">—</b></p>
-    <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-2">1 · Categoria (5)</p>
-    <div id="catGrid" class="grid grid-cols-2 gap-2"></div>
-    <div id="plankHint" class="hidden mt-2 text-[11px] font-bold text-cyan-200">⏱️ Plank = secondi, non ripetizioni</div>
-    <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-2">2 · Variante</p>
-    <div id="varGrid" class="flex flex-wrap gap-2"></div>
-    <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-2">3 · Reps / secondi</p>
-    <input id="logValue" type="number" value="12" min="1" max="100000" inputmode="numeric" class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-2xl font-extrabold text-center outline-none" />
-    <div class="grid grid-cols-4 gap-1.5 mt-2">
-      <button onclick="qLog(1)" class="press glass py-3 text-sm font-extrabold text-emerald-300" style="border-radius:14px">+1</button>
-      <button onclick="qLog(5)" class="press glass py-3 text-sm font-extrabold text-emerald-300" style="border-radius:14px">+5</button>
-      <button onclick="qLog(10)" class="press glass py-3 text-sm font-extrabold text-emerald-300" style="border-radius:14px">+10</button>
-      <button onclick="qLog(20)" class="press py-3 text-sm font-extrabold text-white" style="border-radius:14px;background:linear-gradient(135deg,#6366f1,#22d3ee)">+20</button>
-    </div>
-    <div class="grid grid-cols-3 gap-1.5 mt-1.5">
-      <button onclick="qLog(-1)" class="press glass py-2.5 text-xs font-bold text-red-300" style="border-radius:14px">−1</button>
-      <button onclick="qLog(-5)" class="press glass py-2.5 text-xs font-bold text-red-300" style="border-radius:14px">−5</button>
-      <button onclick="qLog(-10)" class="press glass py-2.5 text-xs font-bold text-red-300" style="border-radius:14px">−10</button>
-    </div>
-    <button onclick="saveAndResume()" class="press w-full mt-3 py-4 rounded-[22px] font-extrabold text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">✅ Registra e Torna al Lavoro</button>
-    <button onclick="finishActivity()" class="press w-full mt-2 py-3.5 rounded-[22px] font-extrabold text-white" style="background:linear-gradient(135deg,#ef4444,#f59e0b)">🏁 Termina e Salva Attività</button>
-    <p id="logSummary" class="text-center text-xs text-slate-400 mt-2"></p>
-  </div>
-
-  <!-- serie sessione corrente -->
-  <div id="sessCard" class="hidden glass rounded-3xl p-5">
-    <h3 class="font-bold">📋 Serie sessione (<span id="sessCount">0</span>)</h3>
-    <div id="sessSets" class="mt-2 space-y-1.5 text-xs"></div>
-  </div>
+  <label class="block text-xs font-semibold text-slate-300 mt-4">Data</label>
+  <input id="inDate" type="date" class="touch mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 text-base font-semibold outline-none" />
+  <p id="selInfo" class="text-center text-xs text-slate-400 mt-3"></p>
 </section>
 
-<!-- ===== TAB STORICO ===== -->
-<section id="page-storico" class="page mt-4 space-y-4">
-  <div class="glass rounded-3xl p-5"><h2 class="font-bold text-lg">🏁 Sessioni</h2><div id="sessHistory" class="mt-2 space-y-2 text-sm"></div></div>
-  <div class="glass rounded-3xl p-5"><h2 class="font-bold text-lg">📜 Serie</h2><div id="historyList" class="mt-2 space-y-3"></div></div>
+<!-- TOTALI -->
+<section class="glass rounded-3xl p-4">
+  <h2 class="font-bold text-base">📊 Totali Accumulati <span class="text-xs font-normal text-slate-400">(oggi)</span></h2>
+  <div id="totals" class="mt-2 space-y-2"></div>
 </section>
 
-<!-- ===== TAB STATS ===== -->
-<section id="page-stats" class="page mt-4 space-y-4">
-  <div class="grid grid-cols-2 gap-3">
-    <div class="glass rounded-3xl p-4"><p class="text-[11px] uppercase tracking-widest text-slate-400">Reps settimana</p><p id="statReps" class="text-3xl font-extrabold text-indigo-300">0</p></div>
-    <div class="glass rounded-3xl p-4"><p class="text-[11px] uppercase tracking-widest text-slate-400">Streak</p><p class="text-3xl font-extrabold text-orange-400"><span id="statStreak">0</span>🔥</p></div>
-  </div>
-  <div class="glass rounded-3xl p-5"><h3 class="font-bold">🏆 PR per esercizio</h3><div id="prList" class="mt-2 space-y-2 text-sm"></div></div>
+<!-- STORICO -->
+<section class="glass rounded-3xl p-4">
+  <h2 class="font-bold text-base">📜 Recenti</h2>
+  <div id="history" class="mt-2 space-y-2"></div>
 </section>
+</main>
 
-<!-- ===== TAB PROFILO ===== -->
-<section id="page-profilo" class="page mt-4 space-y-4">
-  <div class="glass rounded-3xl p-5 text-center">
-    <div id="profileAvatarBig" class="w-20 h-20 mx-auto flex items-center justify-center text-5xl" style="border-radius:28px;background:linear-gradient(135deg,#6366f1,#22d3ee)">💪</div>
-    <h2 id="profileNameBig" class="font-extrabold text-xl mt-2">Atleta</h2>
-    <p id="profileLevelBig" class="text-xs text-indigo-300 font-bold uppercase tracking-widest">Intermedio</p>
+<!-- Pulsante pollice: sticky bottom, sempre raggiungibile -->
+<div class="fixed bottom-0 inset-x-0 z-20 px-3" style="padding-bottom:calc(.75rem + env(safe-area-inset-bottom))">
+  <div class="max-w-sm mx-auto">
+    <button onclick="save()" id="btnSave" class="touch-lg press w-full rounded-[26px] font-extrabold text-lg text-white shadow-2xl"
+      style="background:linear-gradient(135deg,#6366f1,#22d3ee)">➕ Aggiungi al totale</button>
   </div>
-  <div class="glass rounded-3xl p-5 space-y-3">
-    <input id="pfName" type="text" maxlength="60" placeholder="Nome" class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 font-semibold outline-none" />
-    <input id="pfGoal" type="number" min="10" max="100000" placeholder="Obiettivo reps" class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 font-bold outline-none" />
-    <select id="pfLevel" class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 outline-none"><option>Principiante</option><option>Intermedio</option><option>Avanzato</option><option>Bestia 🔥</option></select>
-    <div id="avatarRow" class="flex gap-2 flex-wrap"></div>
-    <button onclick="saveProfile()" class="press w-full py-3.5 font-extrabold text-white" style="border-radius:22px;background:linear-gradient(135deg,#6366f1,#22d3ee)">💾 Salva profilo</button>
-    <button onclick="reloadAll()" class="press w-full py-3 glass font-bold" style="border-radius:22px">🔄 Ricarica dati</button>
-  </div>
-</section>
 </div>
-
-<nav class="fixed bottom-0 inset-x-0 z-20"><div class="max-w-md mx-auto px-4 pb-4" style="padding-bottom:calc(1rem + env(safe-area-inset-bottom))">
-<div class="glass flex justify-around items-center px-1 py-2.5" style="border-radius:28px">
-  <button onclick="switchTab('live')" data-tab="live" class="tab-btn active flex flex-col items-center px-4 py-1"><span class="tab-icon w-11 h-8 rounded-2xl flex items-center justify-center text-lg bg-white/5">⏱️</span><span class="text-[10px] font-bold">Attività</span></button>
-  <button onclick="switchTab('storico')" data-tab="storico" class="tab-btn flex flex-col items-center px-4 py-1"><span class="tab-icon w-11 h-8 rounded-2xl flex items-center justify-center text-lg bg-white/5">📜</span><span class="text-[10px] font-bold">Storico</span></button>
-  <button onclick="switchTab('stats')" data-tab="stats" class="tab-btn flex flex-col items-center px-4 py-1"><span class="tab-icon w-11 h-8 rounded-2xl flex items-center justify-center text-lg bg-white/5">📊</span><span class="text-[10px] font-bold">Stats</span></button>
-  <button onclick="switchTab('profilo')" data-tab="profilo" class="tab-btn flex flex-col items-center px-4 py-1"><span class="tab-icon w-11 h-8 rounded-2xl flex items-center justify-center text-lg bg-white/5">👤</span><span class="text-[10px] font-bold">Profilo</span></button>
-</div></div></nav>
-<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-28 z-30 px-5 py-3 rounded-2xl font-bold text-sm opacity-0 pointer-events-none glass">✅</div>
+<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-24 z-30 px-5 py-3 rounded-2xl font-bold text-sm opacity-0 pointer-events-none glass whitespace-nowrap">✅</div>
 
 <script>
-const EXERCISES = {
-  'Flessioni': { icon:'💪', color:'#6366f1', metric:'reps', variants:['Larghe','Strette','Diamond','Classiche','Decline','Incline'] },
-  'Addominali':{ icon:'🔥', color:'#f59e0b', metric:'reps', variants:['Bassi','Alti','Isometrici'] },
-  'Plank':     { icon:'⏱️', color:'#22d3ee', metric:'seconds', variants:['Normale','Laterale','Dinamico'] },
-  'Trazioni':  { icon:'🧗', color:'#a855f7', metric:'reps', variants:['Pronate','Supine','Neutre','Wide'] },
-  'Chin-up':   { icon:'🏋️', color:'#34d399', metric:'reps', variants:['Classiche','Close grip'] },
-};
-const AVATARS=['💪','🔥','🧗','🏋️','⚡','🐺','🦍','🥷','🚀','🐉'];
-const LS_W='hg_w3', LS_S='hg_s3', LS_P='hg_p3';
-let state={ category:'Flessioni', variant:'Larghe', workouts:[], sessions:[], profile:{name:'Atleta',weekly_goal:500,avatar:'💪',level:'Intermedio'}, avatar:'💪' };
-// sessione live: idle | work | logging (rest in background)
-let act={ phase:'idle', name:'', t0:0, workStart:0, workTs:'', lastWorkSec:0, restStart:0, totalWork:0, totalRest:0, sets:[], tick:null };
+const EXERCISES = [
+  { name:'Flessioni larghe', unit:'reps', icon:'💪' },
+  { name:'Flessioni strette', unit:'reps', icon:'💪' },
+  { name:'Flessioni diamond', unit:'reps', icon:'💎' },
+  { name:'Flessioni classiche', unit:'reps', icon:'💪' },
+  { name:'Addominali bassi', unit:'reps', icon:'🔥' },
+  { name:'Addominali alti', unit:'reps', icon:'🔥' },
+  { name:'Plank', unit:'seconds', icon:'⏱️' },
+  { name:'Trazioni', unit:'reps', icon:'🧗' },
+  { name:'Chin-up', unit:'reps', icon:'🏋️' },
+];
+let sel = 'Flessioni larghe', data = [];
+const $ = id => document.getElementById(id);
+const today = () => '2026-10-02';
+const esc = s => String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function toast(m){ const t=$('toast'); t.textContent=m; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.opacity='0',2000); }
+async function api(p,o={}){ const r=await fetch(p,{headers:{'Content-Type':'application/json'},...o}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.error||r.status); return d; }
 
-const $=id=>document.getElementById(id);
-const mmss=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const fmtClock=ts=>new Date(ts).toLocaleString('it-IT',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-function toast(m,ok=true){ const t=$('toast'); t.textContent=m; t.style.opacity='1'; t.style.transform='translate(-50%,-8px)'; clearTimeout(t._h); t._h=setTimeout(()=>{t.style.opacity='0';t.style.transform='translate(-50%,0)'},2200); }
-async function apiFetch(p,o={}){ const r=await fetch(p,{headers:{'Content-Type':'application/json'},...o}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.error||('HTTP '+r.status)); return d; }
-const autoSessionName=()=>'Sessione '+new Date().toLocaleString('it-IT',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+function renderEx(){
+  $('exGrid').innerHTML = EXERCISES.map(e=>`<button onclick="pick('${esc(e.name)}')" class="ex-btn touch press glass px-3 py-3 text-left text-[13px] font-bold leading-tight ${e.name===sel?'active':''}" style="border-radius:20px">${e.icon} ${esc(e.name)}<br><span class="opacity-70 font-normal text-[11px]">${e.unit==='seconds'?'secondi ⏱️':'reps 🔁'}</span></button>`).join('');
+  const e = EXERCISES.find(x=>x.name===sel);
+  $('selInfo').textContent = `${e.icon} ${e.name} · ${e.unit==='seconds'?'secondi':'ripetizioni'}`;
+  if(e.unit==='seconds' && parseInt($('inAmount').value,10) < 20) $('inAmount').value = 30;
+}
+function pick(n){ sel=n; renderEx(); if(navigator.vibrate) navigator.vibrate(10); }
+function step(d){ const el=$('inAmount'); el.value=Math.max(1,(parseInt(el.value||'0',10)||0)+d); if(navigator.vibrate) navigator.vibrate(8); }
+function resetVal(){ const e=EXERCISES.find(x=>x.name===sel); $('inAmount').value = e.unit==='seconds'?30:10; }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  const now=new Date();
-  $('headerDate').textContent=now.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
-  $('autoTs').textContent=now.toLocaleString('it-IT',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  $('sessName').value=autoSessionName();
-  buildCategories(); buildVariants(); buildAvatarRow();
-  loadLocal(); renderAll(); reloadAll();
-});
-function loadLocal(){ try{
-  const w=JSON.parse(localStorage.getItem(LS_W)||'[]'); if(Array.isArray(w)) state.workouts=w;
-  const s=JSON.parse(localStorage.getItem(LS_S)||'[]'); if(Array.isArray(s)) state.sessions=s;
-  const p=JSON.parse(localStorage.getItem(LS_P)||'null'); if(p){state.profile={...state.profile,...p};state.avatar=state.profile.avatar;}
-}catch(e){} }
-function persistLocal(){ try{ localStorage.setItem(LS_W,JSON.stringify(state.workouts)); localStorage.setItem(LS_S,JSON.stringify(state.sessions)); localStorage.setItem(LS_P,JSON.stringify(state.profile)); }catch(e){} }
-async function reloadAll(){ try{
-  const [w,s,p]=await Promise.all([apiFetch('/api/workouts?limit=500'),apiFetch('/api/workouts?type=sessions'),apiFetch('/api/workouts?type=profile')]);
-  if(w.workouts) state.workouts=w.workouts; if(s.sessions) state.sessions=s.sessions;
-  if(p.profile){state.profile=p.profile;state.avatar=p.profile.avatar;}
-  $('statusBanner').classList.add('hidden'); persistLocal();
- }catch(e){ const b=$('statusBanner'); b.classList.remove('hidden'); b.textContent='⚠️ Offline — dati locali. ('+esc(e.message)+')'; }
- renderAll(); }
+async function load(){ try{ const r=await api('/api/workouts'); data=r.workouts||[]; $('banner').classList.add('hidden'); }
+  catch(e){ $('banner').classList.remove('hidden'); $('banner').textContent='⚠️ Offline — '+e.message; } render(); }
+async function save(){
+  const e = EXERCISES.find(x=>x.name===sel);
+  const body = { exercise:sel, amount:parseInt($('inAmount').value,10), unit:e.unit, date:$('inDate').value||today() };
+  if(!body.amount||body.amount<=0) return toast('❌ Valore non valido');
+  $('btnSave').disabled = true;
+  try{ const r=await api('/api/workouts',{method:'POST',body:JSON.stringify(body)}); data.unshift(r.workout);
+    toast(`✅ +${body.amount}${e.unit==='seconds'?'s':''} ${sel}`); if(navigator.vibrate) navigator.vibrate(30);
+  }catch(e2){ data.unshift({id:Date.now(),...body,created_at:new Date().toISOString()}); toast('📴 Salvato in locale'); }
+  $('btnSave').disabled = false; render();
+}
+async function del(id){ if(!confirm('Eliminare?'))return;
+  try{ await api('/api/workouts?id='+id,{method:'DELETE'}); }catch(e){}
+  data=data.filter(w=>w.id!==id); render(); }
 
-/* ===== Garmin loop ===== */
-function buildCategories(){ $('catGrid').innerHTML=Object.keys(EXERCISES).map(c=>`<button onclick="selCat('${esc(c)}')" class="cat-btn press glass px-3 py-3 text-left" style="border-radius:18px;${c===state.category?'background:linear-gradient(135deg,#6366f1,#22d3ee);color:#fff':''}">
-  <div class="text-xl">${EXERCISES[c].icon}</div><div class="text-xs font-extrabold">${esc(c)}</div></button>`).join(''); }
-function buildVariants(){ const info=EXERCISES[state.category];
-  $('varGrid').innerHTML=info.variants.map(v=>`<button onclick="selVar('${esc(v)}')" class="var-btn press glass px-3.5 py-2 text-xs font-bold" style="border-radius:14px;${v===state.variant?'background:#fff;color:#0f172a':''}">${esc(v)}</button>`).join('');
-  $('plankHint').classList.toggle('hidden', info.metric!=='seconds'); updLogSummary(); }
-function selCat(c){ state.category=c; state.variant=EXERCISES[c].variants[0]; buildCategories(); buildVariants(); }
-function selVar(v){ state.variant=v; buildVariants(); }
-function qLog(d){ const el=$('logValue'); el.value=Math.max(1,(parseInt(el.value||'0',10)||0)+d); updLogSummary(); }
-function updLogSummary(){ const m=EXERCISES[state.category].metric;
-  $('logSummary').textContent=`${EXERCISES[state.category].icon} ${state.category} · ${state.variant} → ${$('logValue').value}${m==='seconds'?'s':' reps'}`; }
-$('logValue')?.addEventListener?.('input',()=>{});
+function render(){
+  const fdate = today();
+  const tot = {}; EXERCISES.forEach(e=>tot[e.name]=0);
+  data.filter(w=>w.date===fdate).forEach(w=>{ tot[w.exercise]=(tot[w.exercise]||0)+w.amount; });
+  $('totals').innerHTML = EXERCISES.map(e=>`<div class="glass px-4 py-3.5 flex items-center gap-3" style="border-radius:20px">
+    <span class="text-2xl">${e.icon}</span>
+    <span class="flex-1 text-sm font-bold leading-tight">${esc(e.name)}<br><span class="text-[10px] font-normal text-slate-500">${e.unit==='seconds'?'secondi':'ripetizioni'} oggi</span></span>
+    <span class="text-xl font-extrabold ${tot[e.name]?'text-emerald-300':'text-slate-700'}">${tot[e.name].toLocaleString('it-IT')}${e.unit==='seconds'?'s':''}</span></div>`).join('');
+  $('history').innerHTML = data.slice(0,20).map(w=>`<div class="glass px-4 py-3 flex items-center gap-2" style="border-radius:18px">
+    <div class="flex-1 min-w-0 text-sm"><b>${esc(w.exercise)}</b> · +${w.amount}${w.unit==='seconds'?'s':''} <span class="text-slate-500">· ${w.date}</span></div>
+    <button onclick="del(${w.id})" class="touch press px-3 text-slate-500" aria-label="Elimina">✕</button></div>`).join('')
+    || '<p class="text-xs text-slate-500 text-center py-3">Nessun inserimento. Tocca ➕!</p>';
+}
 
-function startActivity(){
-  act={ phase:'work', name:$('sessName').value.trim()||autoSessionName(), t0:Date.now(), workStart:Date.now(),
-    workTs:new Date().toISOString(), lastWorkSec:0, restStart:0, totalWork:0, totalRest:0, sets:[], tick:setInterval(tickAct,250) };
-  $('idleCard').classList.add('hidden'); $('workCard').classList.remove('hidden');
-  $('logCard').classList.add('hidden'); $('sessCard').classList.remove('hidden');
-  $('workInfo').textContent='Avviata '+new Date(act.t0).toLocaleString('it-IT')+' · timestamp auto';
-  toast('▶️ Attività avviata');
-}
-function tickAct(){
-  if(act.phase==='work') $('workClock').textContent=mmss((Date.now()-act.workStart)/1000);
-  if(act.phase==='logging') $('restPill').textContent='😮‍💨 '+mmss((Date.now()-act.restStart)/1000);
-}
-function stopAndLog(){
-  if(act.phase!=='work') return;
-  act.lastWorkSec=(Date.now()-act.workStart)/1000; act.totalWork+=act.lastWorkSec;
-  const stopTs=new Date().toISOString();
-  act.stopTs=stopTs; act.restStart=Date.now(); act.phase='logging'; // recupero parte in background
-  $('workCard').classList.add('hidden'); $('logCard').classList.remove('hidden');
-  $('lastWork').textContent=Math.round(act.lastWorkSec)+'s di lavoro';
-  $('logValue').value=EXERCISES[state.category].metric==='seconds'?30:12;
-  updLogSummary(); toast('⏸️ Recupero avviato in background');
-}
-function saveAndResume(){
-  if(act.phase!=='logging') return;
-  const now=Date.now(); const restSec=(now-act.restStart)/1000; act.totalRest+=restSec;
-  const val=Math.max(1,parseInt($('logValue').value,10)||1);
-  const m=EXERCISES[state.category].metric;
-  act.sets.push({ exercise_category:state.category, exercise_name:state.variant, metric_type:m,
-    value_count:val, duration_sec:Math.round(act.lastWorkSec), rest_sec:Math.round(restSec),
-    started_at:act.workTs, ended_at:act.stopTs });
-  renderSessSets();
-  // loop: riparte subito il lavoro
-  act.phase='work'; act.workStart=now; act.workTs=new Date().toISOString();
-  act.lastWorkSec=0; $('logCard').classList.add('hidden'); $('workCard').classList.remove('hidden');
-  $('workClock').textContent='00:00'; toast('✅ Serie salvata — di nuovo al lavoro!');
-}
-async function finishActivity(){
-  if(act.phase==='idle'||!act.sets.length && act.phase!=='logging') { /* consenti chiusura anche senza serie? no */ }
-  if(!act.sets.length) return toast('❌ Registra almeno una serie',false);
-  clearInterval(act.tick);
-  const end=new Date().toISOString();
-  const payload={ session_name:act.name, sets:act.sets,
-    total_work_sec:Math.round(act.totalWork), total_rest_sec:Math.round(act.totalRest),
-    started_at:new Date(act.t0).toISOString(), ended_at:end };
-  try{
-    const {session}=await apiFetch('/api/workouts?type=sessions',{method:'POST',body:JSON.stringify(payload)});
-    state.sessions.unshift(session);
-    const {workouts}=await apiFetch('/api/workouts?limit=500'); state.workouts=workouts;
-    toast('🏁 Attività salvata: '+act.sets.length+' serie');
-  }catch(e){ state.sessions.unshift({id:Date.now(),session_name:payload.session_name,sets:payload.sets,total_sets:payload.sets.length,total_work_sec:payload.total_work_sec,total_rest_sec:payload.total_rest_sec,total_duration_sec:payload.total_work_sec+payload.total_rest_sec,started_at:payload.started_at,ended_at:end});
-    toast('📴 Salvata in locale (offline)'); }
-  act.phase='idle'; $('workCard').classList.add('hidden'); $('logCard').classList.add('hidden');
-  $('idleCard').classList.remove('hidden'); $('sessName').value=autoSessionName();
-  persistLocal(); renderAll(); switchTab('storico');
-}
-function renderSessSets(){ $('sessCount').textContent=act.sets.length;
-  $('sessSets').innerHTML=act.sets.map((s,i)=>`<div class="glass px-3 py-2 flex justify-between" style="border-radius:14px">
-   <span><b>${i+1}.</b> ${esc(s.exercise_name)} · ${s.value_count}${s.metric_type==='seconds'?'s':'r'}</span>
-   <span class="text-slate-400">💪${s.duration_sec}s · 😮‍💨${s.rest_sec}s</span></div>`).join(''); }
-
-/* ===== resto ===== */
-function switchTab(n){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  $('page-'+n).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===n)); window.scrollTo({top:0,behavior:'smooth'}); }
-function weekStart(){ const n=new Date(); n.setHours(0,0,0,0); n.setDate(n.getDate()-((n.getDay()+6)%7)); return n; }
-function calcStreak(){ const days=[...new Set(state.workouts.map(w=>w.date))].sort().reverse(); if(!days.length) return 0;
-  let s=0; const c=new Date(); const iso=new Date().toISOString().slice(0,10);
-  if(!days.includes(iso)) c.setDate(c.getDate()-1);
-  while(days.includes(c.toISOString().slice(0,10))){s++;c.setDate(c.getDate()-1);} return s; }
-function renderHistory(){
-  $('sessHistory').innerHTML=state.sessions.length?state.sessions.slice(0,10).map(s=>{
-    const sets=Array.isArray(s.sets)?s.sets:(typeof s.sets==='string'?JSON.parse(s.sets||'[]'):[]);
-    return `<div class="glass px-3.5 py-3" style="border-radius:20px"><div class="flex justify-between gap-2">
-     <p class="font-bold truncate">🏁 ${esc(s.session_name)}</p><p class="text-xs text-slate-400 shrink-0">${fmtClock(s.started_at)}</p></div>
-     <p class="text-xs text-slate-400">${s.total_sets} serie · 💪${Math.round(s.total_work_sec/60)}min · 😮‍💨${Math.round(s.total_rest_sec/60)}min</p>
-     <p class="text-xs text-slate-500 truncate">${sets.slice(0,4).map(x=>esc(x.exercise_name)+' '+x.value_count+(x.metric_type==='seconds'?'s':'r')).join(' · ')}${sets.length>4?'…':''}</p></div>`;}).join('')
-   :'<p class="text-xs text-slate-500">Nessuna attività registrata.</p>';
-  const g={}; state.workouts.forEach(w=>{(g[w.date]=g[w.date]||[]).push(w);});
-  $('historyList').innerHTML=Object.keys(g).sort().reverse().slice(0,14).map(d=>`<div>
-   <p class="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-1">📅 ${new Date(d+'T12:00:00').toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'})}</p>
-   ${g[d].slice(0,6).map(w=>`<div class="glass px-3 py-2.5 flex justify-between text-xs" style="border-radius:16px">
-    <span><b>${esc(w.exercise_name)}</b> · ${w.value_count}${w.metric_type==='seconds'?'s':'r'}</span>
-    <span class="text-slate-400">⏱️${w.duration_sec||0}s ${w.started_at?'· '+fmtClock(w.started_at):''}</span></div>`).join('')}</div>`).join('')
-   ||'<p class="text-xs text-slate-500">Nessuna serie.</p>'; }
-function renderStats(){
-  const weekly=state.workouts.filter(w=>new Date(w.date+'T12:00:00')>=weekStart());
-  $('statReps').textContent=weekly.filter(w=>w.metric_type!=='seconds').reduce((s,w)=>s+w.value_count*w.sets,0).toLocaleString('it-IT');
-  $('statStreak').textContent=calcStreak(); $('headerStreak').textContent=calcStreak();
-  const pr={}; state.workouts.forEach(w=>{ const k=w.exercise_category+'|'+w.exercise_name; if(!pr[k]||w.value_count>pr[k].value_count) pr[k]=w; });
-  $('prList').innerHTML=Object.values(pr).sort((a,b)=>b.value_count-a.value_count).slice(0,8).map(w=>
-   `<div class="glass px-3 py-2 flex justify-between" style="border-radius:14px"><span>🏆 ${esc(w.exercise_name)} <span class="text-slate-500">· ${esc(w.exercise_category)}</span></span><b>${w.value_count}${w.metric_type==='seconds'?'s':'×'+w.sets}</b></div>`).join('')||'<p class="text-xs text-slate-500">—</p>'; }
-function buildAvatarRow(){ $('avatarRow').innerHTML=AVATARS.map(a=>`<button onclick="pickAvatar('${a}')" class="press w-10 h-10 rounded-2xl text-xl glass ${state.avatar===a?'!bg-white/90':''}">${a}</button>`).join(''); }
-function pickAvatar(a){ state.avatar=a; buildAvatarRow(); $('profileAvatarBig').textContent=a; }
-async function saveProfile(){ const p={name:$('pfName').value.trim()||'Atleta',weekly_goal:parseInt($('pfGoal').value,10)||500,avatar:state.avatar,level:$('pfLevel').value};
-  try{ const r=await apiFetch('/api/workouts?type=profile',{method:'POST',body:JSON.stringify(p)}); state.profile=r.profile; toast('✅ Profilo salvato');
-  }catch(e){ state.profile={...state.profile,...p}; toast('📴 Salvato in locale'); } persistLocal(); renderAll(); }
-function renderProfile(){ const p=state.profile; $('headerName').textContent=p.name; $('headerAvatar').textContent=p.avatar;
-  $('profileAvatarBig').textContent=p.avatar; $('profileNameBig').textContent=p.name; $('profileLevelBig').textContent=p.level;
-  if(document.activeElement!==$('pfName')) $('pfName').value=p.name;
-  if(document.activeElement!==$('pfGoal')) $('pfGoal').value=p.weekly_goal;
-  $('pfLevel').value=p.level; state.avatar=p.avatar; buildAvatarRow(); }
-function renderAll(){ renderHistory(); renderStats(); renderProfile(); }
-document.addEventListener('input',e=>{ if(e.target&&e.target.id==='logValue') updLogSummary(); });
+document.addEventListener('DOMContentLoaded',()=>{ $('inDate').value=today(); renderEx(); load(); });
 </script>
 </body>
 </html>

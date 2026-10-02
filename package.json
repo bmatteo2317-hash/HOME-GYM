@@ -1,7 +1,7 @@
 {
-  "name": "home-gym-calisthenics",
-  "version": "3.0.0",
-  "description": "Web App Garmin-style per calistenica - Vercel + Neon PostgreSQL",
+  "name": "home-gym-mobile",
+  "version": "1.0.0",
+  "description": "Web App mobile-first per totali giornalieri calistenica - Vercel + Neon",
   "main": "api/workouts.js",
   "scripts": {
     "dev": "vercel dev",
