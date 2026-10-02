@@ -1,7 +1,7 @@
 {
-  "name": "home-gym-mobile",
+  "name": "home-gym-mobile-stats",
   "version": "1.0.0",
-  "description": "Web App mobile-first per totali giornalieri calistenica - Vercel + Neon",
+  "description": "Web App mobile-first con statistiche avanzate - Vercel + Neon",
   "main": "api/workouts.js",
   "scripts": {
     "dev": "vercel dev",

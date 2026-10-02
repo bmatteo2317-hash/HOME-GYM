@@ -4,80 +4,76 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<title>HOME-GYM · Mobile</title>
+<title>HOME-GYM · Mobile Stats</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-*{ -webkit-tap-highlight-color:transparent; box-sizing:border-box }
-html{ -webkit-text-size-adjust:100% }
-body{ background:#000; color:#f1f5f9; font-family:-apple-system,"SF Pro Display",Inter,sans-serif; min-height:100dvh; overscroll-behavior-y:contain }
+*{ -webkit-tap-highlight-color:transparent }
+body{ background:#000; color:#f1f5f9; font-family:-apple-system,"SF Pro Display",Inter,sans-serif; min-height:100dvh }
 .glass{ background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.04)); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px); border:1px solid rgba(255,255,255,.10) }
-/* touch target minimo 48px, bottoni grandi da pollice */
 .touch{ min-height:56px; min-width:56px; touch-action:manipulation; user-select:none; -webkit-user-select:none }
-.touch-lg{ min-height:64px }
 .ex-btn.active{ background:linear-gradient(135deg,#6366f1,#22d3ee); color:#fff; border-color:transparent }
-#toast{ transition:all .3s ease }
-.press:active{ transform:scale(.95) }
-input{ color-scheme:dark; font-size:16px !important } /* evita zoom automatico iOS */
-.no-scrollbar::-webkit-scrollbar{ display:none } .no-scrollbar{ scrollbar-width:none }
-.sticky-save{ position:sticky; bottom:calc(.75rem + env(safe-area-inset-bottom)); z-index:20 }
+.tab-btn{ color:#64748b; transition:all .25s ease } .tab-btn.active{ color:#fff }
+.tab-btn.active .tab-icon{ background:linear-gradient(135deg,#6366f1,#22d3ee); transform:translateY(-2px) }
+.page{ display:none } .page.active{ display:block; animation:fu .3s ease }
+@keyframes fu{ from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+#toast{ transition:all .3s ease } .press:active{ transform:scale(.95) }
+input{ color-scheme:dark; font-size:16px !important }
+.bar{ transition:width .5s ease }
 </style>
 </head>
 <body>
-<main class="w-full max-w-sm mx-auto px-3 pt-4 pb-28 space-y-3" style="padding-top:calc(1rem + env(safe-area-inset-top))">
-
+<main class="w-full max-w-sm mx-auto px-3 pt-4 pb-32 space-y-3" style="padding-top:calc(1rem + env(safe-area-inset-top))">
 <header class="glass rounded-3xl p-5 text-center">
   <p class="text-[11px] uppercase tracking-widest text-slate-400">2 Ottobre 2026 · Mobile</p>
-  <h1 class="text-2xl font-extrabold">💪 Totali di oggi</h1>
+  <h1 class="text-2xl font-extrabold">💪 Home Gym</h1>
 </header>
 <div id="banner" class="hidden text-xs px-4 py-3 glass rounded-2xl text-amber-300"></div>
 
-<!-- INSERIMENTO -->
-<section class="glass rounded-3xl p-4">
-  <h2 class="font-bold text-base">⚡ Aggiungi</h2>
-  <div id="exGrid" class="grid grid-cols-2 gap-2 mt-2"></div>
-
-  <label class="block text-xs font-semibold text-slate-300 mt-4">Quantità</label>
-  <div class="flex items-stretch gap-2 mt-1">
-    <button onclick="step(-5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-red-300">−5</button>
-    <input id="inAmount" type="number" value="10" min="1" max="100000" inputmode="numeric" pattern="[0-9]*"
-      class="w-24 bg-white/5 border border-white/10 rounded-2xl py-3 text-2xl font-extrabold text-center outline-none" />
-    <button onclick="step(5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-emerald-300">+5</button>
+<!-- TAB INSERISCI -->
+<section id="page-add" class="page active space-y-3">
+  <div class="glass rounded-3xl p-4">
+    <h2 class="font-bold">⚡ Inserisci</h2>
+    <div id="exGrid" class="grid grid-cols-2 gap-2 mt-2"></div>
+    <label class="block text-xs font-semibold text-slate-300 mt-4">Quantità <span id="unitHint" class="text-slate-500"></span></label>
+    <div class="flex items-stretch gap-2 mt-1">
+      <button onclick="step(-5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-red-300">−5</button>
+      <input id="inAmount" type="number" value="10" min="1" max="100000" inputmode="numeric" class="w-24 bg-white/5 border border-white/10 rounded-2xl py-3 text-2xl font-extrabold text-center outline-none" />
+      <button onclick="step(5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-emerald-300">+5</button>
+    </div>
+    <div class="grid grid-cols-3 gap-2 mt-2">
+      <button onclick="step(-1)" class="touch press glass rounded-2xl font-bold">−1</button>
+      <button onclick="step(1)" class="touch press glass rounded-2xl font-bold text-emerald-300">+1</button>
+      <button onclick="step(10)" class="touch press glass rounded-2xl font-bold text-emerald-300">+10</button>
+    </div>
+    <label class="block text-xs font-semibold text-slate-300 mt-4">Data</label>
+    <input id="inDate" type="date" class="touch mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 text-base outline-none" />
+    <button onclick="save()" id="btnSave" class="touch press w-full mt-3 rounded-[24px] py-4 font-extrabold text-lg text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">➕ Salva</button>
   </div>
-  <div class="grid grid-cols-4 gap-2 mt-2">
-    <button onclick="step(-1)" class="touch press glass rounded-2xl text-base font-bold">−1</button>
-    <button onclick="step(1)" class="touch press glass rounded-2xl text-base font-bold text-emerald-300">+1</button>
-    <button onclick="step(10)" class="touch press glass rounded-2xl text-base font-bold text-emerald-300">+10</button>
-    <button onclick="resetVal()" class="touch press glass rounded-2xl text-xs font-bold text-slate-400">Reset</button>
-  </div>
-
-  <label class="block text-xs font-semibold text-slate-300 mt-4">Data</label>
-  <input id="inDate" type="date" class="touch mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 text-base font-semibold outline-none" />
-  <p id="selInfo" class="text-center text-xs text-slate-400 mt-3"></p>
 </section>
 
-<!-- TOTALI -->
-<section class="glass rounded-3xl p-4">
-  <h2 class="font-bold text-base">📊 Totali Accumulati <span class="text-xs font-normal text-slate-400">(oggi)</span></h2>
-  <div id="totals" class="mt-2 space-y-2"></div>
+<!-- TAB STATISTICHE -->
+<section id="page-stats" class="page space-y-3">
+  <div class="grid grid-cols-2 gap-2">
+    <div class="glass rounded-3xl p-4 text-center"><p class="text-[10px] uppercase tracking-widest text-slate-400">Giorni attivi</p><p id="stDays" class="text-3xl font-extrabold text-cyan-300">0</p></div>
+    <div class="glass rounded-3xl p-4 text-center"><p class="text-[10px] uppercase tracking-widest text-slate-400">Registrazioni</p><p id="stCount" class="text-3xl font-extrabold text-indigo-300">0</p></div>
+  </div>
+  <div class="glass rounded-3xl p-4"><h2 class="font-bold">🏆 Record Personale · Volumi · Medie</h2><div id="perEx" class="mt-2 space-y-2"></div></div>
 </section>
 
-<!-- STORICO -->
-<section class="glass rounded-3xl p-4">
-  <h2 class="font-bold text-base">📜 Recenti</h2>
-  <div id="history" class="mt-2 space-y-2"></div>
+<!-- TAB STORICO -->
+<section id="page-hist" class="page space-y-3">
+  <div class="glass rounded-3xl p-4"><h2 class="font-bold">📜 Storico recente</h2><div id="history" class="mt-2 space-y-2"></div></div>
 </section>
 </main>
 
-<!-- Pulsante pollice: sticky bottom, sempre raggiungibile -->
-<div class="fixed bottom-0 inset-x-0 z-20 px-3" style="padding-bottom:calc(.75rem + env(safe-area-inset-bottom))">
-  <div class="max-w-sm mx-auto">
-    <button onclick="save()" id="btnSave" class="touch-lg press w-full rounded-[26px] font-extrabold text-lg text-white shadow-2xl"
-      style="background:linear-gradient(135deg,#6366f1,#22d3ee)">➕ Aggiungi al totale</button>
+<nav class="fixed bottom-0 inset-x-0 z-20 px-3" style="padding-bottom:calc(.75rem + env(safe-area-inset-bottom))">
+  <div class="max-w-sm mx-auto glass flex justify-around items-center py-2.5" style="border-radius:28px">
+    <button onclick="tab('add')" data-tab="add" class="tab-btn active flex flex-col items-center px-6 py-1"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">➕</span><span class="text-[10px] font-bold">Inserisci</span></button>
+    <button onclick="tab('stats')" data-tab="stats" class="tab-btn flex flex-col items-center px-6 py-1"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">📊</span><span class="text-[10px] font-bold">Stats</span></button>
+    <button onclick="tab('hist')" data-tab="hist" class="tab-btn flex flex-col items-center px-6 py-1"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">📜</span><span class="text-[10px] font-bold">Storico</span></button>
   </div>
-</div>
-<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-24 z-30 px-5 py-3 rounded-2xl font-bold text-sm opacity-0 pointer-events-none glass whitespace-nowrap">✅</div>
+</nav>
+<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-28 z-30 px-5 py-3 rounded-2xl font-bold text-sm opacity-0 pointer-events-none glass whitespace-nowrap">✅</div>
 
 <script>
 const EXERCISES = [
@@ -91,54 +87,64 @@ const EXERCISES = [
   { name:'Trazioni', unit:'reps', icon:'🧗' },
   { name:'Chin-up', unit:'reps', icon:'🏋️' },
 ];
-let sel = 'Flessioni larghe', data = [];
-const $ = id => document.getElementById(id);
-const today = () => '2026-10-02';
-const esc = s => String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let sel='Flessioni larghe', data=[];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function toast(m){ const t=$('toast'); t.textContent=m; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.opacity='0',2000); }
 async function api(p,o={}){ const r=await fetch(p,{headers:{'Content-Type':'application/json'},...o}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.error||r.status); return d; }
+function tab(n){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $('page-'+n).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===n)); }
 
 function renderEx(){
-  $('exGrid').innerHTML = EXERCISES.map(e=>`<button onclick="pick('${esc(e.name)}')" class="ex-btn touch press glass px-3 py-3 text-left text-[13px] font-bold leading-tight ${e.name===sel?'active':''}" style="border-radius:20px">${e.icon} ${esc(e.name)}<br><span class="opacity-70 font-normal text-[11px]">${e.unit==='seconds'?'secondi ⏱️':'reps 🔁'}</span></button>`).join('');
-  const e = EXERCISES.find(x=>x.name===sel);
-  $('selInfo').textContent = `${e.icon} ${e.name} · ${e.unit==='seconds'?'secondi':'ripetizioni'}`;
-  if(e.unit==='seconds' && parseInt($('inAmount').value,10) < 20) $('inAmount').value = 30;
+  $('exGrid').innerHTML=EXERCISES.map(e=>`<button onclick="pick('${esc(e.name)}')" class="ex-btn touch press glass px-3 py-3 text-left text-[13px] font-bold leading-tight ${e.name===sel?'active':''}" style="border-radius:20px">${e.icon} ${esc(e.name)}<br><span class="opacity-70 text-[11px] font-normal">${e.unit==='seconds'?'secondi ⏱️':'reps 🔁'}</span></button>`).join('');
+  const e=EXERCISES.find(x=>x.name===sel);
+  $('unitHint').textContent = e.unit==='seconds' ? '(secondi ⏱️)' : '(ripetizioni 🔁)';
+  if(e.unit==='seconds' && parseInt($('inAmount').value,10)<20) $('inAmount').value=30;
 }
 function pick(n){ sel=n; renderEx(); if(navigator.vibrate) navigator.vibrate(10); }
-function step(d){ const el=$('inAmount'); el.value=Math.max(1,(parseInt(el.value||'0',10)||0)+d); if(navigator.vibrate) navigator.vibrate(8); }
-function resetVal(){ const e=EXERCISES.find(x=>x.name===sel); $('inAmount').value = e.unit==='seconds'?30:10; }
-
+function step(d){ $('inAmount').value=Math.max(1,(parseInt($('inAmount').value||'0',10)||0)+d); }
 async function load(){ try{ const r=await api('/api/workouts'); data=r.workouts||[]; $('banner').classList.add('hidden'); }
   catch(e){ $('banner').classList.remove('hidden'); $('banner').textContent='⚠️ Offline — '+e.message; } render(); }
 async function save(){
-  const e = EXERCISES.find(x=>x.name===sel);
-  const body = { exercise:sel, amount:parseInt($('inAmount').value,10), unit:e.unit, date:$('inDate').value||today() };
+  const e=EXERCISES.find(x=>x.name===sel);
+  const body={ exercise:sel, amount:parseInt($('inAmount').value,10), unit:e.unit, date:$('inDate').value||'2026-10-02' };
   if(!body.amount||body.amount<=0) return toast('❌ Valore non valido');
-  $('btnSave').disabled = true;
-  try{ const r=await api('/api/workouts',{method:'POST',body:JSON.stringify(body)}); data.unshift(r.workout);
-    toast(`✅ +${body.amount}${e.unit==='seconds'?'s':''} ${sel}`); if(navigator.vibrate) navigator.vibrate(30);
-  }catch(e2){ data.unshift({id:Date.now(),...body,created_at:new Date().toISOString()}); toast('📴 Salvato in locale'); }
-  $('btnSave').disabled = false; render();
+  try{ const r=await api('/api/workouts',{method:'POST',body:JSON.stringify(body)}); data.unshift(r.workout); toast(`✅ +${body.amount} ${sel}`); }
+  catch(e2){ data.unshift({id:Date.now(),...body,created_at:new Date().toISOString()}); toast('📴 Salvato in locale'); }
+  render();
 }
 async function del(id){ if(!confirm('Eliminare?'))return;
   try{ await api('/api/workouts?id='+id,{method:'DELETE'}); }catch(e){}
   data=data.filter(w=>w.id!==id); render(); }
 
 function render(){
-  const fdate = today();
-  const tot = {}; EXERCISES.forEach(e=>tot[e.name]=0);
-  data.filter(w=>w.date===fdate).forEach(w=>{ tot[w.exercise]=(tot[w.exercise]||0)+w.amount; });
-  $('totals').innerHTML = EXERCISES.map(e=>`<div class="glass px-4 py-3.5 flex items-center gap-3" style="border-radius:20px">
-    <span class="text-2xl">${e.icon}</span>
-    <span class="flex-1 text-sm font-bold leading-tight">${esc(e.name)}<br><span class="text-[10px] font-normal text-slate-500">${e.unit==='seconds'?'secondi':'ripetizioni'} oggi</span></span>
-    <span class="text-xl font-extrabold ${tot[e.name]?'text-emerald-300':'text-slate-700'}">${tot[e.name].toLocaleString('it-IT')}${e.unit==='seconds'?'s':''}</span></div>`).join('');
-  $('history').innerHTML = data.slice(0,20).map(w=>`<div class="glass px-4 py-3 flex items-center gap-2" style="border-radius:18px">
+  // Statistiche avanzate
+  $('stDays').textContent = new Set(data.map(w=>w.date)).size;
+  $('stCount').textContent = data.length;
+  $('perEx').innerHTML = EXERCISES.map(e=>{
+    const rows = data.filter(w=>w.exercise===e.name);
+    const vol = rows.reduce((s,w)=>s+w.amount,0);
+    const pr = rows.length ? Math.max(...rows.map(w=>w.amount)) : 0;
+    const avg = rows.length ? (vol/rows.length) : 0;
+    const max = Math.max(1,...EXERCISES.map(x=>data.filter(w=>w.exercise===x.name).reduce((s,w)=>s+w.amount,0)));
+    const pct = Math.round(vol/max*100);
+    const u = e.unit==='seconds'?'s':'';
+    return `<div class="glass px-4 py-3" style="border-radius:20px">
+      <div class="flex items-center gap-2"><span class="text-xl">${e.icon}</span>
+        <span class="flex-1 text-sm font-bold">${esc(e.name)}</span>
+        <span class="text-xs font-extrabold text-amber-300">🏆 ${pr}${u}</span></div>
+      <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+        <span>Volume: <b class="text-slate-200">${vol.toLocaleString('it-IT')}${u}</b></span>
+        <span>Media/sess: <b class="text-slate-200">${avg.toFixed(1)}${u}</b></span>
+        <span>N: <b class="text-slate-200">${rows.length}</b></span></div>
+      <div class="h-2 mt-1.5 rounded-full bg-white/10 overflow-hidden"><div class="bar h-full rounded-full" style="width:${pct}%;background:linear-gradient(90deg,#6366f1,#22d3ee)"></div></div>
+    </div>`; }).join('');
+  $('history').innerHTML = data.slice(0,30).map(w=>`<div class="glass px-4 py-3 flex items-center gap-2" style="border-radius:18px">
     <div class="flex-1 min-w-0 text-sm"><b>${esc(w.exercise)}</b> · +${w.amount}${w.unit==='seconds'?'s':''} <span class="text-slate-500">· ${w.date}</span></div>
-    <button onclick="del(${w.id})" class="touch press px-3 text-slate-500" aria-label="Elimina">✕</button></div>`).join('')
-    || '<p class="text-xs text-slate-500 text-center py-3">Nessun inserimento. Tocca ➕!</p>';
+    <button onclick="del(${w.id})" class="touch press px-3 text-slate-500">✕</button></div>`).join('')
+    || '<p class="text-xs text-slate-500 text-center py-3">Nessun inserimento.</p>';
 }
-
-document.addEventListener('DOMContentLoaded',()=>{ $('inDate').value=today(); renderEx(); load(); });
+document.addEventListener('DOMContentLoaded',()=>{ $('inDate').value='2026-10-02'; renderEx(); load(); });
 </script>
 </body>
 </html>

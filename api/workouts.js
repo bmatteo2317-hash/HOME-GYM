@@ -1,6 +1,7 @@
-// api/workouts.js — Vercel Serverless + Neon (mobile-first, totali giornalieri)
+// api/workouts.js — Vercel Serverless + Neon (mobile-first + stats avanzate)
 // GET  /api/workouts -> { workouts: [...] }
 // POST /api/workouts { exercise, amount, unit: 'reps'|'seconds', date: 'YYYY-MM-DD' } -> { workout }
+// Le statistiche (giorni attivi, PR, volumi, medie) sono calcolate nel frontend.
 
 const { Pool } = require('pg');
 let pool;
@@ -36,7 +37,7 @@ module.exports = async (req, res) => {
       CREATE INDEX IF NOT EXISTS idx_workouts_date ON workouts(date DESC);
     `);
     if (req.method === 'GET') {
-      const { rows } = await client.query('SELECT * FROM workouts ORDER BY date DESC, created_at DESC LIMIT 500');
+      const { rows } = await client.query('SELECT * FROM workouts ORDER BY date DESC, created_at DESC LIMIT 1000');
       return send(res, 200, { workouts: rows });
     }
     if (req.method === 'POST') {
