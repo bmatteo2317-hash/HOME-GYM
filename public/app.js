@@ -109,6 +109,7 @@ async function renderHome() {
     <div class="flex-1"><p class="font-extrabold leading-tight">${calcStreak(me || null)} giorni di fila</p>
     <p class="text-[11px] text-slate-400">${me ? '@' + esc(me) + ' · ' : ''}oggi: ${todayTot} · target ${goal}</p></div>
     <a href="profile.html" class="press glass rounded-2xl px-3 py-2 text-xs font-bold">👤</a>`;
+  renderHomeStats(me);
   $('homeGrid').innerHTML = Object.entries(TYPES).map(([t, i]) => {
     const rows = data.filter((w) => ofType(w, t));
     const tot = rows.reduce((s, w) => s + w.amount, 0);
@@ -131,6 +132,44 @@ async function renderHome() {
         <span class="text-xs text-slate-400">👥${x.members}</span></a>`;
     }).join('') : '<p class="text-xs text-slate-500">Nessuna stanza — creane una dalla scheda Rank del tuo esercizio! 🔒</p>';
   } catch (e) { $('roomsHome').innerHTML = '<p class="text-xs text-slate-500">Stanze non disponibili offline.</p>'; }
+}
+
+/* Statistiche generali del profilo in home */
+function renderHomeStats(me) {
+  const box = $('homeStats');
+  if (!box) return;
+  const mine = data.filter((w) => !me || w.username === me);
+  if (!me) {
+    $('homeStatsSub').textContent = 'Imposta il tuo username per statistiche personali';
+    box.innerHTML = `<a href="profile.html" class="press glass px-4 py-3 flex items-center gap-2 text-sm font-bold" style="border-radius:18px">👤 Vai al Profilo <span class="ml-auto">›</span></a>`;
+    return;
+  }
+  const days = new Set(mine.map((w) => w.date)).size;
+  const vol = mine.reduce((s, w) => s + w.amount, 0);
+  const pr = mine.length ? Math.max(...mine.map((w) => w.amount)) : 0;
+  const avg = mine.length ? (vol / mine.length).toFixed(1) : 0;
+  $('homeStatsSub').textContent = `@${me} · ${flag(profile.country)} ${profile.country || ''} · target ${goal}/giorno`;
+  const cards = [
+    ['🔥', String(calcStreak(me)), 'gg streak'],
+    ['📦', vol.toLocaleString('it-IT'), 'volume tot'],
+    ['🏆', String(pr), 'PR max'],
+    ['📅', String(days), 'giorni attivi'],
+    ['📝', String(mine.length), 'serie'],
+    ['📊', String(avg), 'media/serie'],
+  ];
+  box.innerHTML = `<div class="grid grid-cols-3 gap-1.5">` + cards.map(([icon, v, l]) =>
+    `<div class="glass px-2 py-2.5 text-center" style="border-radius:16px">
+      <div class="text-base">${icon}</div><div class="font-extrabold leading-tight">${esc(v)}</div>
+      <div class="text-[9px] text-slate-500">${l}</div></div>`).join('') + `</div>
+    <div class="mt-1.5 space-y-1">` + Object.entries(TYPES).map(([t, i]) => {
+      const rows = mine.filter((w) => ofType(w, t));
+      const tv = rows.reduce((s, w) => s + w.amount, 0);
+      const tp = rows.length ? Math.max(...rows.map((w) => w.amount)) : 0;
+      const u = i.unit === 'seconds' ? 's' : '';
+      return `<a href="${i.file}" class="press glass px-3 py-2 flex items-center gap-2 text-xs" style="border-radius:14px">
+        <span>${i.icon}</span><b class="flex-1">${esc(t)}</b>
+        <span class="text-slate-400">Vol <b class="text-slate-100">${tv}${u}</b> · PR <b class="text-amber-300">${tp}${u}</b> · 🔥${calcStreak(me, t)}gg</span></a>`;
+    }).join('') + `</div>`;
 }
 
 /* ---------- PAGINA ESERCIZIO ---------- */
