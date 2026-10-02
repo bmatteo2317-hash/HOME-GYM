@@ -182,7 +182,7 @@ function renderStatsPage() {
       const tp = rows.length ? Math.max(...rows.map((w) => w.amount)) : 0;
       const ta = rows.length ? (tv / rows.length).toFixed(1) : 0;
       const u = i.unit === 'seconds' ? 's' : '';
-      const maxV = Math.max(1, ...Object.values(TYPES).map(([k]) => mine.filter((w) => ofType(w, k)).reduce((s, w) => s + w.amount, 0)));
+      const maxV = Math.max(1, ...Object.keys(TYPES).map((k) => mine.filter((w) => ofType(w, k)).reduce((s, w) => s + w.amount, 0)));
       return `<a href="${i.file}" class="press glass rounded-3xl p-5 block">
         <div class="flex items-center gap-3">
           <span class="text-4xl">${i.icon}</span>
