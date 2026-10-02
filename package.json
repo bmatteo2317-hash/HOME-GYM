@@ -1,0 +1,16 @@
+{
+  "name": "home-gym-calisthenics",
+  "version": "1.0.0",
+  "description": "Web App moderna per tracciare allenamenti calistenici a corpo libero - Vercel + Neon PostgreSQL",
+  "main": "api/workouts.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "pg": "^8.12.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
