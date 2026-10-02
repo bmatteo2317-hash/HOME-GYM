@@ -65,6 +65,20 @@ async function boot() {
   if (page === 'home') renderHome();
   if (page === 'profile') renderProfilePage();
   if (page === 'exercise') renderExercisePage();
+  if (page === 'rank') renderRankPage();
+}
+
+/* ---------- PAGINA CLASSIFICHE GLOBALI (tutti e 4 gli esercizi) ---------- */
+function renderRankPage() {
+  const sel = $('rankExG');
+  if (sel && !sel.options.length) {
+    const opts = [{ label: 'all' }];
+    Object.entries(TYPES).forEach(([t, i]) => { opts.push({ label: t }); i.variants.forEach((v) => opts.push({ label: t + ' · ' + v })); });
+    sel.innerHTML = opts.map((o) => `<option value="${esc(o.label)}">${o.label === 'all' ? '⭐ Tutti (Flessioni+Addominali+Plank+Trazioni)' : esc(o.label)}</option>`).join('');
+  }
+  paintRankSeg(); loadRank();
+  const q = new URLSearchParams(location.search).get('room');
+  if (q) { rank.scope = 'room'; rank.room = q.trim().toUpperCase(); paintRankSeg(); loadRank(); }
 }
 
 /* ---------- giorni ---------- */
@@ -226,7 +240,8 @@ function rankRow(r, i, metric) {
 }
 async function loadRank() {
   paintRankSeg();
-  const ex = TYPE; // classifica filtrata sull'esercizio della pagina
+  const exSel = $('rankExG');
+  const ex = TYPE || (exSel ? exSel.value : 'all') || 'all'; // pagina globale: filtro selezionabile (tutti e 4 gli esercizi)
   const qs = `scope=${rank.scope}&country=${encodeURIComponent(profile.country || 'Italia')}&period=${rank.period}&metric=${rank.metric}&exercise=${encodeURIComponent(ex)}&room=${encodeURIComponent(rank.room || '')}`;
   try {
     const r = await api('/api/workouts?type=leaderboard&' + qs);
@@ -283,7 +298,7 @@ async function loadRoomPanel() {
       <button onclick="joinByCode()" class="press px-5 rounded-2xl font-extrabold text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">Entra</button></div>
       <div class="flex gap-2"><input id="roomName" placeholder="Nome nuova stanza (es. Sfida Lupi)" maxlength="60" class="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 outline-none" />
       <button onclick="createRoom()" class="press px-5 rounded-2xl font-extrabold text-white" style="background:linear-gradient(135deg,#34d399,#22d3ee)">Crea</button></div>
-      <p class="text-[11px] text-slate-500">La stanza sfida è legata a <b>${esc(TYPE)}</b>. Creala e condividi il link!</p></div>`;
+      <p class="text-[11px] text-slate-500">La stanza sfida è legata a <b>${esc(TYPE || 'tutti gli esercizi')}</b>. Creala e condividi il link!</p></div>`;
     return;
   }
   try {
@@ -304,7 +319,8 @@ async function createRoom() {
   if (!name) return toast('❌ Dai un nome alla stanza');
   if (!profile.username) { toast('👤 Imposta username nel Profilo'); return; }
   try {
-    const r = await api('/api/workouts?type=rooms', { method: 'POST', body: JSON.stringify({ name, exercise: TYPE, username: profile.username, country: profile.country }) });
+    const exScope = TYPE || (($('rankExG') || {}).value || 'all');
+    const r = await api('/api/workouts?type=rooms', { method: 'POST', body: JSON.stringify({ name, exercise: exScope, username: profile.username, country: profile.country }) });
     rank.room = r.room.code;
     history.replaceState(null, '', '?room=' + r.room.code);
     toast('🎉 Stanza creata! Condividi il link');
