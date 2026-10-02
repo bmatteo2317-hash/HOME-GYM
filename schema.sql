@@ -42,6 +42,13 @@ BEGIN
   SET exercise = TRIM(BOTH ' ' FROM COALESCE(NULLIF(category,''),'') || CASE WHEN COALESCE(NULLIF(variant,''),'') <> '' THEN ' · ' || variant ELSE '' END)
   WHERE (exercise IS NULL OR exercise = '') AND (COALESCE(category,'') <> '' OR COALESCE(variant,'') <> '');
 END $$;
+-- Dati migrati: rimuove le colonne vecchie (i nuovi INSERT non le valorizzano
+-- e i vecchi NOT NULL farebbero fallire ogni salvataggio)
+ALTER TABLE workouts DROP COLUMN IF EXISTS exercise_category;
+ALTER TABLE workouts DROP COLUMN IF EXISTS exercise_name;
+ALTER TABLE workouts DROP COLUMN IF EXISTS metric_type;
+ALTER TABLE workouts DROP COLUMN IF EXISTS value_count;
+ALTER TABLE workouts DROP COLUMN IF EXISTS sets;
 CREATE INDEX IF NOT EXISTS idx_workouts_date ON workouts(date DESC);
 CREATE INDEX IF NOT EXISTS idx_workouts_user ON workouts(username);
 
