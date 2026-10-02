@@ -1,7 +1,6 @@
-// api/workouts.js — Vercel Serverless + Neon (mobile-first + stats avanzate)
-// GET  /api/workouts -> { workouts: [...] }
-// POST /api/workouts { exercise, amount, unit: 'reps'|'seconds', date: 'YYYY-MM-DD' } -> { workout }
-// Le statistiche (giorni attivi, PR, volumi, medie) sono calcolate nel frontend.
+// api/workouts.js — Vercel Serverless + Neon (tipologia+variante, day-nav, obiettivi)
+// GET  /api/workouts -> { workouts }
+// POST /api/workouts { category, variant, exercise?, amount, unit?, date } -> { workout }
 
 const { Pool } = require('pg');
 let pool;
@@ -29,11 +28,15 @@ module.exports = async (req, res) => {
       CREATE TABLE IF NOT EXISTS workouts (
         id SERIAL PRIMARY KEY,
         exercise TEXT NOT NULL,
+        category TEXT NOT NULL DEFAULT '',
+        variant TEXT NOT NULL DEFAULT '',
         amount INTEGER NOT NULL CHECK (amount > 0),
         unit TEXT NOT NULL DEFAULT 'reps' CHECK (unit IN ('reps','seconds')),
         date DATE NOT NULL DEFAULT CURRENT_DATE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+      ALTER TABLE workouts ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT '';
+      ALTER TABLE workouts ADD COLUMN IF NOT EXISTS variant TEXT NOT NULL DEFAULT '';
       CREATE INDEX IF NOT EXISTS idx_workouts_date ON workouts(date DESC);
     `);
     if (req.method === 'GET') {
@@ -42,14 +45,20 @@ module.exports = async (req, res) => {
     }
     if (req.method === 'POST') {
       const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-      if (!b.exercise) return send(res, 400, { error: 'exercise obbligatorio' });
+      const category = String(b.category || '').slice(0, 40);
+      const variant = String(b.variant || '').slice(0, 40);
+      const exercise = String(b.exercise || (category && variant ? category + ' · ' + variant : category || variant)).slice(0, 80);
+      if (!exercise) return send(res, 400, { error: 'exercise/category obbligatorio' });
       const amount = parseInt(b.amount, 10);
       if (!Number.isFinite(amount) || amount <= 0) return send(res, 400, { error: 'amount deve essere > 0' });
       let d = new Date().toISOString().slice(0, 10);
       if (b.date && /^\d{4}-\d{2}-\d{2}$/.test(b.date)) d = b.date;
+      // blocco futuro: mai oltre oggi
+      const today = new Date().toISOString().slice(0, 10);
+      if (d > today) return send(res, 400, { error: 'Non puoi registrare nel futuro' });
       const { rows } = await client.query(
-        'INSERT INTO workouts (exercise, amount, unit, date) VALUES ($1,$2,$3,$4) RETURNING *',
-        [String(b.exercise).slice(0, 80), amount, b.unit === 'seconds' ? 'seconds' : 'reps', d]
+        'INSERT INTO workouts (exercise, category, variant, amount, unit, date) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
+        [exercise, category, variant, amount, b.unit === 'seconds' ? 'seconds' : 'reps', d]
       );
       return send(res, 201, { workout: rows[0] });
     }

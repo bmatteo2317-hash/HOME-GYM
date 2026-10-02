@@ -1,7 +1,7 @@
 {
-  "name": "home-gym-mobile-stats",
+  "name": "home-gym-day-nav",
   "version": "1.0.0",
-  "description": "Web App mobile-first con statistiche avanzate - Vercel + Neon",
+  "description": "Mobile-first con navigazione giorni e obiettivi - Vercel + Neon",
   "main": "api/workouts.js",
   "scripts": {
     "dev": "vercel dev",
