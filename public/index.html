@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
-<title>HOME-GYM · Day Navigator</title>
+<title>HOME-GYM · Classifiche</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 *{ -webkit-tap-highlight-color:transparent }
@@ -18,16 +18,17 @@ body{ background:#000; color:#f1f5f9; font-family:-apple-system,"SF Pro Display"
 .page{ display:none } .page.active{ display:block; animation:fu .3s ease }
 @keyframes fu{ from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 #toast{ transition:all .3s ease } .press:active{ transform:scale(.95) }
-input{ color-scheme:dark; font-size:16px !important }
+input,select{ color-scheme:dark; font-size:16px !important }
 .bar{ transition:width .5s ease }
 .arrow:disabled{ opacity:.3 }
+.seg{ transition:all .2s ease } .seg.active{ background:#fff; color:#0f172a; border-color:transparent }
+.me{ border-color:rgba(52,211,153,.5) !important; box-shadow:0 0 0 1px rgba(52,211,153,.4) }
 </style>
 </head>
 <body>
 <main class="w-full max-w-sm mx-auto px-3 pt-4 pb-32 space-y-3" style="padding-top:calc(1rem + env(safe-area-inset-top))">
 <header class="glass rounded-3xl p-4 text-center">
   <h1 class="text-xl font-extrabold">💪 Home Gym</h1>
-  <!-- Navigazione giorni < > : mai nel futuro -->
   <div class="flex items-center justify-between mt-3 gap-2">
     <button id="dayPrev" onclick="moveDay(-1)" class="arrow touch press glass rounded-2xl w-14 text-xl font-extrabold" aria-label="Giorno precedente">‹</button>
     <div class="flex-1"><p id="dayLabel" class="font-extrabold">—</p><p id="daySub" class="text-[11px] text-slate-400">—</p></div>
@@ -36,9 +37,12 @@ input{ color-scheme:dark; font-size:16px !important }
   <button onclick="goToday()" class="text-[11px] font-bold text-indigo-300 mt-1">↩ Torna a oggi</button>
 </header>
 <div id="banner" class="hidden text-xs px-4 py-3 glass rounded-2xl text-amber-300"></div>
+<div id="profileCta" class="hidden glass rounded-3xl p-4 text-sm border-amber-300/40">
+  <p class="font-bold">👤 Completa il profilo per entrare in classifica!</p>
+  <button onclick="tab('profilo')" class="press mt-2 w-full py-3 rounded-2xl font-extrabold text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">Vai al Profilo</button>
+</div>
 
 <section id="page-add" class="page active space-y-3">
-  <!-- Obiettivo giornaliero -->
   <div class="glass rounded-3xl p-4">
     <div class="flex items-end justify-between"><h2 class="font-bold text-sm">🎯 Obiettivo giornaliero</h2><span id="goalPct" class="text-sm font-extrabold text-emerald-300">0%</span></div>
     <div class="h-3.5 mt-2 rounded-full bg-white/10 overflow-hidden"><div id="goalBar" class="bar h-full rounded-full" style="width:0%;background:linear-gradient(90deg,#34d399,#22d3ee)"></div></div>
@@ -70,16 +74,58 @@ input{ color-scheme:dark; font-size:16px !important }
 <section id="page-stats" class="page space-y-3">
   <div class="glass rounded-3xl p-4"><h2 class="font-bold">📊 Dettaglio esercizi · Record Personale (PR)</h2><div id="perEx" class="mt-2 space-y-2"></div></div>
 </section>
+
 <section id="page-hist" class="page space-y-3">
   <div class="glass rounded-3xl p-4"><h2 class="font-bold">📜 Storico <span id="histDate" class="text-xs font-normal text-slate-400"></span></h2><div id="history" class="mt-2 space-y-2"></div></div>
 </section>
+
+<section id="page-rank" class="page space-y-3">
+  <div class="glass rounded-3xl p-4">
+    <h2 class="font-bold">🏆 Classifiche</h2>
+    <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Ambito</p>
+    <div class="grid grid-cols-2 gap-2">
+      <button id="segGlobal" onclick="setScope('global')" class="seg touch press glass rounded-2xl text-sm font-extrabold">🌍 Mondiale</button>
+      <button id="segCountry" onclick="setScope('country')" class="seg touch press glass rounded-2xl text-sm font-extrabold">🇮🇹 Stato</button>
+    </div>
+    <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Periodo</p>
+    <div class="grid grid-cols-3 gap-2">
+      <button id="segToday" onclick="setPeriod('today')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Oggi</button>
+      <button id="segWeek" onclick="setPeriod('week')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Settimana</button>
+      <button id="segAll" onclick="setPeriod('all')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Sempre</button>
+    </div>
+    <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Esercizio</p>
+    <select id="rankEx" onchange="loadRank()" class="touch w-full bg-white/5 border border-white/10 rounded-2xl px-4 outline-none"></select>
+    <div id="rankList" class="mt-3 space-y-2"></div>
+  </div>
+</section>
+
+<section id="page-profilo" class="page space-y-3">
+  <div class="glass rounded-3xl p-5 text-center">
+    <div id="pfAvatar" class="w-20 h-20 mx-auto flex items-center justify-center text-5xl" style="border-radius:28px;background:linear-gradient(135deg,#6366f1,#22d3ee)">💪</div>
+    <h2 id="pfNameBig" class="font-extrabold text-xl mt-2">Atleta</h2>
+    <p id="pfMeta" class="text-xs text-slate-400"></p>
+  </div>
+  <div class="glass rounded-3xl p-4 space-y-3">
+    <h2 class="font-bold">👤 Profilo classifica</h2>
+    <div><label class="text-xs font-semibold text-slate-300">Username * (come appari in classifica)</label>
+      <input id="pfUsername" type="text" maxlength="30" placeholder="es. marco84" class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 font-bold outline-none" /></div>
+    <div><label class="text-xs font-semibold text-slate-300">Paese * (per la classifica Stato)</label>
+      <select id="pfCountry" class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 font-bold outline-none"></select></div>
+    <div><label class="text-xs font-semibold text-slate-300">Nome visualizzato</label>
+      <input id="pfName" type="text" maxlength="60" class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 outline-none" /></div>
+    <button onclick="saveProfile()" class="touch press w-full rounded-[22px] py-3.5 font-extrabold text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">💾 Salva profilo</button>
+    <button onclick="reloadAll()" class="touch press w-full glass rounded-[22px] py-3 font-bold">🔄 Ricarica dati</button>
+  </div>
+</section>
 </main>
 
-<nav class="fixed bottom-0 inset-x-0 z-20 px-3" style="padding-bottom:calc(.75rem + env(safe-area-inset-bottom))">
-  <div class="max-w-sm mx-auto glass flex justify-around py-2.5" style="border-radius:28px">
-    <button onclick="tab('add')" data-tab="add" class="tab-btn active flex flex-col items-center px-6"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">➕</span><span class="text-[10px] font-bold">Inserisci</span></button>
-    <button onclick="tab('stats')" data-tab="stats" class="tab-btn flex flex-col items-center px-6"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">📊</span><span class="text-[10px] font-bold">Stats</span></button>
-    <button onclick="tab('hist')" data-tab="hist" class="tab-btn flex flex-col items-center px-6"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">📜</span><span class="text-[10px] font-bold">Storico</span></button>
+<nav class="fixed bottom-0 inset-x-0 z-20 px-2" style="padding-bottom:calc(.6rem + env(safe-area-inset-bottom))">
+  <div class="max-w-sm mx-auto glass flex justify-around py-2" style="border-radius:28px">
+    <button onclick="tab('add')" data-tab="add" class="tab-btn active flex flex-col items-center px-2"><span class="tab-icon touch flex items-center justify-center w-12 h-10 rounded-2xl bg-white/5 text-lg">➕</span><span class="text-[9px] font-bold">Inserisci</span></button>
+    <button onclick="tab('stats')" data-tab="stats" class="tab-btn flex flex-col items-center px-2"><span class="tab-icon touch flex items-center justify-center w-12 h-10 rounded-2xl bg-white/5 text-lg">📊</span><span class="text-[9px] font-bold">Stats</span></button>
+    <button onclick="tab('hist')" data-tab="hist" class="tab-btn flex flex-col items-center px-2"><span class="tab-icon touch flex items-center justify-center w-12 h-10 rounded-2xl bg-white/5 text-lg">📜</span><span class="text-[9px] font-bold">Storico</span></button>
+    <button onclick="tab('rank')" data-tab="rank" class="tab-btn flex flex-col items-center px-2"><span class="tab-icon touch flex items-center justify-center w-12 h-10 rounded-2xl bg-white/5 text-lg">🏆</span><span class="text-[9px] font-bold">Rank</span></button>
+    <button onclick="tab('profilo')" data-tab="profilo" class="tab-btn flex flex-col items-center px-2"><span class="tab-icon touch flex items-center justify-center w-12 h-10 rounded-2xl bg-white/5 text-lg">👤</span><span class="text-[9px] font-bold">Profilo</span></button>
   </div>
 </nav>
 <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-28 z-30 px-5 py-3 rounded-2xl font-bold text-sm opacity-0 pointer-events-none glass whitespace-nowrap">✅</div>
@@ -92,92 +138,161 @@ const TYPES = {
   'Trazioni':  { icon:'🧗', unit:'reps', variants:['Pronate','Supine','Neutre','Wide'] },
   'Chin-up':   { icon:'🏋️', unit:'reps', variants:['Classiche','Close grip'] },
 };
-const NAMES = []; Object.entries(TYPES).forEach(([t,i])=>i.variants.forEach(v=>NAMES.push({ type:t, variant:v, label:t+' · '+v, unit:i.unit, icon:i.icon })));
-let type='Flessioni', variant='Larghe', data=[], goal=100;
-let dayOffset = 0; // 0 = oggi, negativo = passato, mai positivo (no futuro)
+const COUNTRIES = ['Italia','Francia','Germania','Spagna','Portogallo','Regno Unito','USA','Canada','Brasile','Argentina','Australia','Giappone','Altro'];
+const NAMES = [{ label:'all', icon:'⭐' }];
+Object.entries(TYPES).forEach(([t,i])=>{ NAMES.push({ type:t, label:t, icon:i.icon }); i.variants.forEach(v=>NAMES.push({ type:t, variant:v, label:t+' · '+v, icon:i.icon })); });
+let type='Flessioni', variant='Larghe', data=[], goal=100, dayOffset=0;
+let profile={ name:'Atleta', username:'', country:'Italia', weekly_goal:500, avatar:'💪', level:'Intermedio' };
+let rank={ scope:'global', period:'today', exercise:'all', rows:[], offline:false };
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const isoOf=d=>d.toISOString().slice(0,10);
 const realToday=()=>{ const n=new Date(); n.setHours(0,0,0,0); return n; };
 const selDate=()=>{ const d=realToday(); d.setDate(d.getDate()+dayOffset); return d; };
+const flag=c=>({Italia:'🇮🇹',Francia:'🇫🇷',Germania:'🇩🇪',Spagna:'🇪🇸',Portogallo:'🇵🇹','Regno Unito':'🇬🇧',USA:'🇺🇸',Canada:'🇨🇦',Brasile:'🇧🇷',Argentina:'🇦🇷',Australia:'🇦🇺',Giappone:'🇯🇵'}[c]||'🏳️');
 function toast(m){ const t=$('toast'); t.textContent=m; t.style.opacity='1'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.opacity='0',2000); }
 async function api(p,o={}){ const r=await fetch(p,{headers:{'Content-Type':'application/json'},...o}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.error||r.status); return d; }
 function tab(n){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $('page-'+n).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===n)); }
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
+  if(n==='rank') loadRank(); }
 
-/* --- day navigator: default oggi, frecce, no futuro --- */
 function paintDay(){
-  const d=selDate(), iso=isoOf(d);
-  const isToday = dayOffset===0;
-  $('dayLabel').textContent = d.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
-  $('daySub').textContent = isToday ? '📍 Oggi · '+iso : iso + (dayOffset<0 ? ` · ${-dayOffset}g fa` : '');
-  $('dayNext').disabled = isToday; // freccia futuro bloccata
-  $('histDate').textContent = '· '+iso;
+  const d=selDate(), iso=isoOf(d), isToday=dayOffset===0;
+  $('dayLabel').textContent=d.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+  $('daySub').textContent=isToday?'📍 Oggi · '+iso:iso+` · ${-dayOffset}g fa`;
+  $('dayNext').disabled=isToday;
+  $('histDate').textContent='· '+iso;
   render();
 }
-function moveDay(dir){
-  if(dir>0 && dayOffset>=0) return toast('⛔ Non puoi andare nel futuro');
-  dayOffset=Math.min(0,dayOffset+dir); paintDay();
-}
+function moveDay(dir){ if(dir>0&&dayOffset>=0) return toast('⛔ Non puoi andare nel futuro'); dayOffset=Math.min(0,dayOffset+dir); paintDay(); }
 function goToday(){ dayOffset=0; paintDay(); }
 
-/* --- selezione tipologia → variante --- */
 function renderTypes(){
   $('typeGrid').innerHTML=Object.entries(TYPES).map(([t,i])=>`<button onclick="pickType('${esc(t)}')" class="type-btn touch press glass px-3 py-3 text-left text-[13px] font-bold ${t===type?'active':''}" style="border-radius:20px">${i.icon} ${esc(t)}<br><span class="opacity-70 text-[11px] font-normal">${i.unit==='seconds'?'secondi':'reps'}</span></button>`).join('');
   $('varGrid').innerHTML=TYPES[type].variants.map(v=>`<button onclick="pickVar('${esc(v)}')" class="var-btn touch press glass px-4 text-sm font-bold ${v===variant?'active':''}" style="border-radius:16px;min-height:48px">${esc(v)}</button>`).join('');
   const u=TYPES[type].unit;
-  $('unitHint').textContent = u==='seconds' ? '⏱️ Plank: inserisci SECONDI' : '🔁 Ripetizioni';
-  if(u==='seconds' && parseInt($('inAmount').value,10)<20) $('inAmount').value=30;
+  $('unitHint').textContent=u==='seconds'?'⏱️ Plank: inserisci SECONDI':'🔁 Ripetizioni';
+  if(u==='seconds'&&parseInt($('inAmount').value,10)<20) $('inAmount').value=30;
 }
 function pickType(t){ type=t; variant=TYPES[t].variants[0]; renderTypes(); }
 function pickVar(v){ variant=v; renderTypes(); }
 function step(d){ $('inAmount').value=Math.max(1,(parseInt($('inAmount').value||'0',10)||0)+d); }
 
-async function load(){ try{ const r=await api('/api/workouts'); data=r.workouts||[]; $('banner').classList.add('hidden'); }
-  catch(e){ $('banner').classList.remove('hidden'); $('banner').textContent='⚠️ Offline — '+e.message; } paintDay(); }
+async function reloadAll(){
+  try{
+    const [w,p]=await Promise.all([api('/api/workouts'),api('/api/workouts?type=profile')]);
+    data=w.workouts||[]; if(p.profile) profile={...profile,...p.profile};
+    $('banner').classList.add('hidden');
+    try{ localStorage.setItem('hg_w',JSON.stringify(data)); localStorage.setItem('hg_p',JSON.stringify(profile)); }catch(e){}
+  }catch(e){ $('banner').classList.remove('hidden'); $('banner').textContent='⚠️ Offline — '+e.message;
+    try{ data=JSON.parse(localStorage.getItem('hg_w')||'[]'); profile={...profile,...JSON.parse(localStorage.getItem('hg_p')||'{}')}; }catch(e2){} }
+  syncProfileUI(); paintDay(); loadRank();
+}
 async function save(){
+  if(!profile.username){ toast('👤 Prima imposta username nel Profilo'); tab('profilo'); return; }
   const u=TYPES[type].unit, iso=isoOf(selDate());
-  const body={ category:type, variant, exercise:type+' · '+variant, amount:parseInt($('inAmount').value,10), unit:u, date:iso };
+  const body={ category:type, variant, exercise:type+' · '+variant, amount:parseInt($('inAmount').value,10), unit:u, date:iso, username:profile.username, country:profile.country };
   if(!body.amount||body.amount<=0) return toast('❌ Valore non valido');
   try{ const r=await api('/api/workouts',{method:'POST',body:JSON.stringify(body)}); data.unshift(r.workout); toast(`✅ +${body.amount} · ${type} ${variant}`); }
-  catch(e){ data.unshift({id:Date.now(),...body,created_at:new Date().toISOString()}); toast('📴 Salvato in locale · '+e.message); }
-  render();
+  catch(e){ data.unshift({id:Date.now(),...body,created_at:new Date().toISOString()}); toast('📴 Salvato in locale'); }
+  render(); loadRank();
 }
 async function del(id){ if(!confirm('Eliminare?'))return;
   try{ await api('/api/workouts?id='+id,{method:'DELETE'}); }catch(e){}
   data=data.filter(w=>w.id!==id); render(); }
-function changeGoal(){ const v=prompt('Obiettivo giornaliero (reps/sec totali)?',goal); const n=parseInt(v,10); if(n>0){goal=n;$('goalVal').textContent=n;render();} }
+function changeGoal(){ const v=prompt('Obiettivo giornaliero?',goal); const n=parseInt(v,10); if(n>0){goal=n;$('goalVal').textContent=n;render();} }
+
+/* --- classifiche --- */
+function setScope(s){ rank.scope=s; paintRankSeg(); loadRank(); }
+function setPeriod(p){ rank.period=p; paintRankSeg(); loadRank(); }
+function paintRankSeg(){
+  $('segGlobal').classList.toggle('active',rank.scope==='global');
+  $('segCountry').classList.toggle('active',rank.scope==='country');
+  $('segToday').classList.toggle('active',rank.period==='today');
+  $('segWeek').classList.toggle('active',rank.period==='week');
+  $('segAll').classList.toggle('active',rank.period==='all');
+}
+function medal(i){ return i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'°'; }
+function medalStyle(i){ return i===0?'border-color:rgba(250,204,21,.6) !important':i===1?'border-color:rgba(203,213,225,.5) !important':i===2?'border-color:rgba(217,119,6,.55) !important':''; }
+async function loadRank(){
+  rank.exercise=$('rankEx').value||'all';
+  paintRankSeg();
+  const qs=`scope=${rank.scope}&country=${encodeURIComponent(profile.country||'Italia')}&period=${rank.period}&exercise=${encodeURIComponent(rank.exercise)}`;
+  try{
+    const r=await api('/api/workouts?type=leaderboard&'+qs);
+    rank.rows=r.leaderboard||[]; rank.offline=false;
+  }catch(e){
+    // fallback locale: aggrega i dati scaricati
+    rank.offline=true;
+    const today=isoOf(realToday());
+    const weekAgo=new Date(realToday().getTime()-6*864e5);
+    const map={};
+    data.forEach(w=>{
+      if(!w.username) return;
+      if(rank.scope==='country'&&(w.country||'')!==profile.country) return;
+      if(rank.period==='today'&&w.date!==today) return;
+      if(rank.period==='week'&&w.date<isoOf(weekAgo)) return;
+      if(rank.exercise!=='all'){
+        const k=(w.category&&w.variant)?w.category+' · '+w.variant:w.exercise;
+        if(rank.exercise.includes('·')?k!==rank.exercise:!(k===rank.exercise||k.startsWith(rank.exercise+' ·'))) return;
+      }
+      (map[w.username]=map[w.username]||{username:w.username,country:w.country||'',total:0,best:0,entries:0,unit:w.unit}).total+=w.amount;
+      const m=map[w.username]; m.best=Math.max(m.best,w.amount); m.entries++;
+    });
+    rank.rows=Object.values(map).sort((a,b)=>b.total-a.total).slice(0,50);
+  }
+  const title=rank.scope==='country'?flag(profile.country)+' '+esc(profile.country):'🌍 Mondiale';
+  $('rankList').innerHTML=
+    `<p class="text-[11px] text-slate-400">${title} · ${rank.period==='today'?'Oggi':rank.period==='week'?'Ultimi 7 giorni':'All-time'} · ${esc(rank.exercise==='all'?'Tutti gli esercizi':rank.exercise)}${rank.offline?' · 📴 offline (parziale)':''}</p>`+
+    (rank.rows.length?rank.rows.map((r,i)=>`<div class="glass px-4 py-3 flex items-center gap-3 ${r.username===profile.username?'me':''}" style="border-radius:20px;${medalStyle(i)}">
+      <span class="text-xl w-9 text-center font-extrabold">${medal(i)}</span>
+      <div class="flex-1 min-w-0"><p class="font-bold truncate">${esc(r.username)} ${r.username===profile.username?'<span class="text-[10px] text-emerald-300">· TU</span>':''}</p>
+        <p class="text-[11px] text-slate-400">${flag(r.country)} ${esc(r.country||'—')} · 🏆 max ${r.best} · ×${r.entries}</p></div>
+      <span class="font-extrabold ${i===0?'text-yellow-300':''}">${Number(r.total).toLocaleString('it-IT')}</span></div>`).join('')
+    :'<p class="text-xs text-slate-500 text-center py-4">Nessuno in classifica con questi filtri — sii il primo! 🚀</p>');
+}
+
+/* --- profilo --- */
+function syncProfileUI(){
+  $('pfUsername').value=profile.username||''; $('pfCountry').value=profile.country||'Italia';
+  $('pfName').value=profile.name||'Atleta';
+  $('pfNameBig').textContent=profile.name||'Atleta';
+  $('pfAvatar').textContent=profile.avatar||'💪';
+  $('pfMeta').textContent=(profile.username?'@'+profile.username+' · ':'')+flag(profile.country)+' '+(profile.country||'');
+  $('profileCta').classList.toggle('hidden',!!profile.username);
+}
+async function saveProfile(){
+  const u=$('pfUsername').value.trim();
+  if(!u) return toast('❌ Username obbligatorio',false);
+  profile={ ...profile, username:u, country:$('pfCountry').value, name:$('pfName').value.trim()||'Atleta' };
+  try{ const r=await api('/api/workouts?type=profile',{method:'POST',body:JSON.stringify(profile)}); profile=r.profile; toast('✅ Profilo salvato — sei in classifica!'); }
+  catch(e){ try{localStorage.setItem('hg_p',JSON.stringify(profile));}catch(e2){} toast('📴 Salvato in locale'); }
+  syncProfileUI(); loadRank();
+}
 
 function keyOf(w){ return (w.category&&w.variant)?(w.category+' · '+w.variant):w.exercise; }
 function render(){
-  const iso=isoOf(selDate());
-  const dayRows=data.filter(w=>w.date===iso);
-  const dayTot=dayRows.reduce((s,w)=>s+w.amount,0);
+  const iso=isoOf(selDate()), dayRows=data.filter(w=>w.date===iso), dayTot=dayRows.reduce((s,w)=>s+w.amount,0);
   const pct=Math.min(100,Math.round(dayTot/goal*100));
   $('goalBar').style.width=pct+'%'; $('goalPct').textContent=pct+'%';
-  $('goalText').textContent = `${dayTot}/${goal} oggi · ${pct>=100?'🎉 Target raggiunto!':(goal-dayTot)+' mancanti'}`;
-  // stats per esercizio
-  $('perEx').innerHTML=NAMES.map(n=>{
-    const rows=data.filter(w=>keyOf(w)===n.label);
-    const vol=rows.reduce((s,w)=>s+w.amount,0);
-    const pr=rows.length?Math.max(...rows.map(w=>w.amount)):0;
-    const avg=rows.length?(vol/rows.length):0;
-    const last5=rows.slice(0,5).map(w=>w.amount);
-    const trend=last5.length>1?(last5[0]-last5[last5.length-1]):0;
-    const u=n.unit==='seconds'?'s':'';
-    const spark=last5.slice().reverse().map((v,i,a)=>{ const m=Math.max(...a,1); return `<div class="flex-1 rounded-sm" title="${v}" style="height:${Math.max(15,Math.round(v/m*100))}%;background:${i===a.length-1?'#22d3ee':'rgba(255,255,255,.2)'}"></div>`; }).join('');
-    return `<div class="glass px-4 py-3" style="border-radius:20px">
-      <div class="flex items-center gap-2"><span class="text-xl">${n.icon}</span><span class="flex-1 text-[13px] font-bold">${esc(n.label)}</span>
-      <span class="text-[11px] font-extrabold ${trend>0?'text-emerald-300':trend<0?'text-red-300':'text-slate-500'}">${trend>0?'↗ +'+trend:trend<0?'↘ '+trend:'→ 0'}</span></div>
-      <div class="flex justify-between text-[11px] text-slate-400 mt-1"><span>Vol <b class="text-slate-100">${vol}${u}</b></span><span>PR <b class="text-amber-300">${pr}${u}</b></span><span>Media <b class="text-slate-100">${avg.toFixed(1)}${u}</b></span><span>×${rows.length}</span></div>
-      <div class="flex items-end gap-1 h-8 mt-2">${spark||'<span class="text-[10px] text-slate-600">nessun dato</span>'}</div></div>`; }).join('');
-  const rows=dayRows;
-  $('history').innerHTML=rows.length?rows.map(w=>`<div class="glass px-4 py-3 flex items-center gap-2" style="border-radius:18px">
-    <div class="flex-1 min-w-0 text-sm"><b>${esc(keyOf(w))}</b> · +${w.amount}${w.unit==='seconds'?'s':''}</div>
+  $('goalText').textContent=`${dayTot}/${goal} oggi · ${pct>=100?'🎉 Target raggiunto!':(goal-dayTot)+' mancanti'}`;
+  const allLabels=[...new Set([...NAMES.slice(1).map(n=>n.label),...data.map(keyOf)])];
+  $('perEx').innerHTML=allLabels.map(label=>{
+    const rows=data.filter(w=>keyOf(w)===label);
+    const vol=rows.reduce((s,w)=>s+w.amount,0), pr=rows.length?Math.max(...rows.map(w=>w.amount)):0, avg=rows.length?vol/rows.length:0;
+    const u=rows[0]?.unit==='seconds'||label.startsWith('Plank')?'s':'';
+    return `<div class="glass px-4 py-3" style="border-radius:20px"><div class="flex justify-between text-[13px]"><b>${esc(label)}</b><span class="text-amber-300 font-extrabold">🏆 ${pr}${u}</span></div>
+      <p class="text-[11px] text-slate-400">Vol <b class="text-slate-100">${vol}${u}</b> · Media <b class="text-slate-100">${avg.toFixed(1)}${u}</b> · ×${rows.length}</p></div>`; }).join('');
+  $('history').innerHTML=dayRows.length?dayRows.map(w=>`<div class="glass px-4 py-3 flex items-center gap-2" style="border-radius:18px">
+    <div class="flex-1 min-w-0 text-sm"><b>${esc(keyOf(w))}</b> · +${w.amount}${w.unit==='seconds'?'s':''}${w.username?` <span class="text-slate-500">@${esc(w.username)}</span>`:''}</div>
     <button onclick="del(${w.id})" class="touch press px-3 text-slate-500">✕</button></div>`).join('')
    :'<p class="text-xs text-slate-500 text-center py-4">Nessun inserimento in questo giorno.</p>';
 }
-document.addEventListener('DOMContentLoaded',()=>{ renderTypes(); load(); });
+document.addEventListener('DOMContentLoaded',()=>{
+  $('rankEx').innerHTML=NAMES.map(n=>`<option value="${esc(n.label)}">${n.label==='all'?'⭐ Tutti gli esercizi':esc(n.icon+' '+n.label)}</option>`).join('');
+  $('pfCountry').innerHTML=COUNTRIES.map(c=>`<option ${c==='Italia'?'selected':''}>${c}</option>`).join('');
+  renderTypes(); paintRankSeg(); reloadAll();
+});
 </script>
 </body>
 </html>

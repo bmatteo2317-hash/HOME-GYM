@@ -1,11 +1,35 @@
--- Totali giornalieri — Schema Neon
--- Esegui nel Neon SQL Editor
+-- HOME-GYM — Schema Neon (con Classifiche Mondiale/Stato)
+-- Esegui nel Neon SQL Editor (sicuro da rieseguire: IF NOT EXISTS)
+
 CREATE TABLE IF NOT EXISTS workouts (
   id SERIAL PRIMARY KEY,
   exercise TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT '',
+  variant TEXT NOT NULL DEFAULT '',
   amount INTEGER NOT NULL CHECK (amount > 0),
-  unit TEXT NOT NULL DEFAULT 'reps' CHECK (unit IN ('reps', 'seconds')),
+  unit TEXT NOT NULL DEFAULT 'reps' CHECK (unit IN ('reps','seconds')),
   date DATE NOT NULL DEFAULT CURRENT_DATE,
+  username TEXT NOT NULL DEFAULT '',
+  country TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE workouts ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT '';
+ALTER TABLE workouts ADD COLUMN IF NOT EXISTS variant TEXT NOT NULL DEFAULT '';
+ALTER TABLE workouts ADD COLUMN IF NOT EXISTS username TEXT NOT NULL DEFAULT '';
+ALTER TABLE workouts ADD COLUMN IF NOT EXISTS country TEXT NOT NULL DEFAULT '';
 CREATE INDEX IF NOT EXISTS idx_workouts_date ON workouts(date DESC);
+CREATE INDEX IF NOT EXISTS idx_workouts_user ON workouts(username);
+
+CREATE TABLE IF NOT EXISTS profile (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  name TEXT NOT NULL DEFAULT 'Atleta',
+  username TEXT NOT NULL DEFAULT '',
+  country TEXT NOT NULL DEFAULT 'Italia',
+  weekly_goal INTEGER NOT NULL DEFAULT 500,
+  avatar TEXT NOT NULL DEFAULT '💪',
+  level TEXT NOT NULL DEFAULT 'Intermedio',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE profile ADD COLUMN IF NOT EXISTS username TEXT NOT NULL DEFAULT '';
+ALTER TABLE profile ADD COLUMN IF NOT EXISTS country TEXT NOT NULL DEFAULT 'Italia';
+INSERT INTO profile (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
