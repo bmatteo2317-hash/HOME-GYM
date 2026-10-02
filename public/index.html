@@ -6,92 +6,58 @@
 <title>HOME-GYM · Calisthenics Tracker</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-tailwind.config = {
-  theme: {
-    extend: {
-      fontFamily: { sans: ['-apple-system','SF Pro Display','Inter','Segoe UI','sans-serif'] },
-      colors: { oled: '#000000', card: 'rgba(255,255,255,0.06)' }
-    }
-  }
-}
+tailwind.config = { theme: { extend: { fontFamily: { sans: ['-apple-system','SF Pro Display','Inter','Segoe UI','sans-serif'] } } } }
 </script>
 <style>
   * { -webkit-tap-highlight-color: transparent; }
-  body { background: #000; color: #f1f5f9; font-family: -apple-system, "SF Pro Display", Inter, sans-serif; }
-  .bg-orbs::before, .bg-orbs::after {
-    content:''; position: fixed; border-radius: 9999px; filter: blur(90px); opacity: .35; z-index: 0; pointer-events: none;
-  }
-  .bg-orbs::before { width: 340px; height: 340px; background: #4f46e5; top: -110px; left: -110px; }
-  .bg-orbs::after { width: 320px; height: 320px; background: #06b6d4; bottom: 60px; right: -120px; }
-  .glass {
-    background: linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-    backdrop-filter: blur(22px) saturate(160%);
-    -webkit-backdrop-filter: blur(22px) saturate(160%);
-    border: 1px solid rgba(255,255,255,.12);
-    box-shadow: 0 8px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12);
-  }
-  .bubble { border-radius: 28px; }
-  .bubble-sm { border-radius: 20px; }
-  .cat-btn { transition: all .25s cubic-bezier(.34,1.56,.64,1); }
-  .cat-btn.active {
-    background: linear-gradient(135deg, #6366f1, #22d3ee);
-    border-color: transparent; color: #fff;
-    transform: scale(1.04);
-    box-shadow: 0 8px 24px rgba(99,102,241,.45);
-  }
-  .var-btn.active {
-    background: rgba(255,255,255,.92); color: #0f172a; border-color: transparent;
-    transform: scale(1.03);
-  }
-  .var-btn { transition: all .2s ease; }
-  .tab-btn { transition: all .25s ease; color: #64748b; }
-  .tab-btn.active { color: #fff; }
-  .tab-btn.active .tab-icon {
-    background: linear-gradient(135deg,#6366f1,#22d3ee);
-    box-shadow: 0 6px 20px rgba(99,102,241,.5);
-    transform: translateY(-2px);
-  }
-  .tab-icon { transition: all .25s ease; }
-  .page { display: none; animation: fadeUp .35s ease; }
-  .page.active { display: block; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px);} to { opacity: 1; transform: none; } }
-  input, select { color-scheme: dark; }
-  input[type="number"]::-webkit-inner-spin-button { opacity: .4; }
-  .bar-col { transition: height .6s cubic-bezier(.22,1,.36,1); }
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { scrollbar-width: none; }
-  #toast { transition: all .35s cubic-bezier(.34,1.56,.64,1); }
-  .press:active { transform: scale(.97); }
+  body { background:#000; color:#f1f5f9; font-family:-apple-system,"SF Pro Display",Inter,sans-serif; }
+  .bg-orbs::before,.bg-orbs::after{content:'';position:fixed;border-radius:9999px;filter:blur(90px);opacity:.35;z-index:0;pointer-events:none}
+  .bg-orbs::before{width:340px;height:340px;background:#4f46e5;top:-110px;left:-110px}
+  .bg-orbs::after{width:320px;height:320px;background:#06b6d4;bottom:60px;right:-120px}
+  .glass{background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.04));backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);border:1px solid rgba(255,255,255,.10);box-shadow:0 8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12)}
+  .bubble{border-radius:28px}.bubble-sm{border-radius:20px}
+  .cat-btn{transition:all .25s cubic-bezier(.34,1.56,.64,1)}
+  .cat-btn.active{background:linear-gradient(135deg,#6366f1,#22d3ee);border-color:transparent;color:#fff;transform:scale(1.04);box-shadow:0 8px 24px rgba(99,102,241,.45)}
+  .var-btn{transition:all .2s ease}
+  .var-btn.active{background:rgba(255,255,255,.92);color:#0f172a;border-color:transparent;transform:scale(1.03)}
+  .tab-btn{transition:all .25s ease;color:#64748b}
+  .tab-btn.active{color:#fff}
+  .tab-btn.active .tab-icon{background:linear-gradient(135deg,#6366f1,#22d3ee);box-shadow:0 6px 20px rgba(99,102,241,.5);transform:translateY(-2px)}
+  .tab-icon{transition:all .25s ease}
+  .page{display:none;animation:fadeUp .35s ease}
+  .page.active{display:block}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  input,select{color-scheme:dark}
+  .bar-col{transition:height .6s cubic-bezier(.22,1,.36,1)}
+  .no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{scrollbar-width:none}
+  #toast{transition:all .35s cubic-bezier(.34,1.56,.64,1)}
+  .press:active{transform:scale(.97)}
+  #inValue,#inSets{transition:transform .15s ease,border-color .15s ease}
 </style>
 </head>
 <body class="bg-orbs min-h-screen pb-32">
-
 <div class="relative z-10 max-w-md mx-auto px-4 pt-6">
 
-  <!-- HEADER -->
-  <header class="glass bubble p-5 flex items-center gap-4">
-    <div id="headerAvatar" class="w-14 h-14 rounded-[20px] flex items-center justify-center text-3xl shrink-0"
-         style="background:linear-gradient(135deg,#6366f1,#22d3ee)">💪</div>
+  <header class="glass rounded-3xl p-5 flex items-center gap-4">
+    <div id="headerAvatar" class="w-14 h-14 rounded-[20px] flex items-center justify-center text-3xl shrink-0" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">💪</div>
     <div class="flex-1 min-w-0">
       <p class="text-[11px] uppercase tracking-widest text-slate-400">Home Gym · Calisthenics</p>
       <h1 class="text-xl font-extrabold truncate">Ciao, <span id="headerName">Atleta</span> 👋</h1>
       <p id="headerDate" class="text-xs text-slate-400"></p>
     </div>
-    <div class="text-center shrink-0">
-      <div class="glass bubble-sm px-3 py-2">
-        <div class="text-lg font-extrabold text-orange-400">🔥 <span id="headerStreak">0</span></div>
-        <div class="text-[10px] text-slate-400 -mt-0.5">streak</div>
-      </div>
+    <div class="glass bubble-sm px-3 py-2 text-center shrink-0">
+      <div class="text-lg font-extrabold text-orange-400">🔥 <span id="headerStreak">0</span></div>
+      <div class="text-[10px] text-slate-400 -mt-0.5">streak</div>
     </div>
   </header>
 
   <div id="statusBanner" class="hidden mt-3 text-xs px-4 py-2.5 bubble-sm glass text-amber-300"></div>
 
-  <!-- ============ PAGE: REGISTRA ============ -->
-  <section id="page-registra" class="page active mt-4 space-y-4">
-    <div class="glass bubble p-5">
-      <h2 class="font-bold text-lg">⚡ Registra allenamento</h2>
-      <p class="text-xs text-slate-400 mt-0.5">Tocca categoria → variante → inserisci valori</p>
+  <!-- TAB 1: WORKOUT -->
+  <section id="page-workout" class="page active mt-4 space-y-4">
+    <div class="glass rounded-3xl p-5">
+      <h2 class="font-bold text-lg">🏋️‍♂️ Workout rapido</h2>
+      <p class="text-xs text-slate-400 mt-0.5">Categoria → variante → volume con un tap</p>
 
       <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-4 mb-2">1 · Categoria</p>
       <div id="catGrid" class="grid grid-cols-2 gap-2.5"></div>
@@ -101,7 +67,7 @@ tailwind.config = {
 
       <div class="mt-4 glass bubble-sm p-4" style="background:rgba(0,0,0,.25)">
         <div class="flex items-center justify-between">
-          <p class="text-[11px] uppercase tracking-widest text-slate-400">3 · Dettagli</p>
+          <p class="text-[11px] uppercase tracking-widest text-slate-400">3 · Volume</p>
           <span id="unitBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">🔁 reps</span>
         </div>
         <div class="grid grid-cols-2 gap-3 mt-3">
@@ -117,9 +83,8 @@ tailwind.config = {
           </div>
         </div>
 
-        <!-- ⚡ Inserimento rapido -->
         <div class="mt-3 rounded-2xl p-3 border border-white/10" style="background:rgba(99,102,241,.07)">
-          <p class="text-[11px] uppercase tracking-widest text-slate-300 font-extrabold">⚡ Inserimento rapido <span id="quickUnit" class="text-indigo-300">reps</span></p>
+          <p class="text-[11px] uppercase tracking-widest font-extrabold text-slate-300">⚡ Tap rapido · <span id="quickUnit" class="text-indigo-300">reps</span></p>
           <div class="grid grid-cols-6 gap-1.5 mt-2">
             <button onclick="quickAdjust('value',-10)" class="press glass bubble-sm py-2.5 text-xs font-extrabold text-red-300">−10</button>
             <button onclick="quickAdjust('value',-5)" class="press glass bubble-sm py-2.5 text-xs font-extrabold text-red-300">−5</button>
@@ -128,73 +93,57 @@ tailwind.config = {
             <button onclick="quickAdjust('value',5)" class="press glass bubble-sm py-2.5 text-xs font-extrabold text-emerald-300">+5</button>
             <button onclick="quickAdjust('value',10)" class="press glass bubble-sm py-2.5 text-xs font-extrabold text-emerald-300">+10</button>
           </div>
-          <div class="grid grid-cols-3 gap-1.5 mt-1.5">
-            <button onclick="quickAdd('value',5)" class="press bubble-sm py-2 text-[11px] font-bold bg-white/5 border border-white/10">+5 ⚡</button>
-            <button onclick="quickAdd('value',10)" class="press bubble-sm py-2 text-[11px] font-bold bg-white/5 border border-white/10">+10 ⚡</button>
-            <button onclick="quickAdd('value',20)" class="press bubble-sm py-2 text-[11px] font-bold bg-cyan-400/15 border border-cyan-300/30 text-cyan-200">+20 🚀</button>
-          </div>
-          <div class="flex items-center gap-1.5 mt-2.5">
+          <div class="flex items-center gap-1.5 mt-2">
             <span class="text-[11px] text-slate-400 font-bold shrink-0">Sets:</span>
             <button onclick="quickAdjust('sets',-1)" class="press flex-1 glass bubble-sm py-2 text-xs font-extrabold">−1</button>
             <button onclick="quickAdjust('sets',1)" class="press flex-1 glass bubble-sm py-2 text-xs font-extrabold text-indigo-300">+1</button>
-            <button onclick="quickSet('sets',1)" class="press flex-1 bubble-sm py-2 text-[11px] font-bold bg-white/5 border border-white/10">1</button>
             <button onclick="quickSet('sets',3)" class="press flex-1 bubble-sm py-2 text-[11px] font-bold bg-white/5 border border-white/10">3</button>
             <button onclick="quickSet('sets',5)" class="press flex-1 bubble-sm py-2 text-[11px] font-bold bg-white/5 border border-white/10">5</button>
           </div>
         </div>
 
+        <div class="mt-3">
+          <label class="text-xs text-slate-300 font-semibold">📝 Note (opzionale)</label>
+          <input id="inNotes" type="text" maxlength="500" placeholder="es. forma perfetta, zavorra 10kg…"
+            class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm outline-none focus:border-indigo-400" />
+        </div>
+
         <div class="mt-3 flex items-center justify-between gap-3">
-          <label class="flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer select-none">
-            <button id="dateToggle" onclick="toggleDateEdit()" aria-pressed="false"
-              class="w-11 h-6 rounded-full relative transition-all" style="background:rgba(255,255,255,.15)">
+          <button id="dateToggle" onclick="toggleDateEdit()" aria-pressed="false" class="flex items-center gap-2 text-xs font-bold text-slate-300 shrink-0">
+            <span id="datePill" class="w-11 h-6 rounded-full relative transition-all inline-block" style="background:rgba(255,255,255,.15)">
               <span id="dateKnob" class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-all"></span>
-            </button>
+            </span>
             📅 <span id="dateToggleLabel">Oggi (auto)</span>
-          </label>
-          <input id="inDate" type="date" disabled
-            class="flex-1 bg-white/5 border border-white/10 rounded-2xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-indigo-400 disabled:opacity-40" />
+          </button>
+          <input id="inDate" type="date" disabled class="flex-1 bg-white/5 border border-white/10 rounded-2xl px-3 py-2.5 text-sm font-semibold outline-none disabled:opacity-40" />
         </div>
       </div>
 
-      <button id="btnSave" onclick="saveWorkout()"
-        class="press w-full mt-4 py-4 rounded-[24px] font-extrabold text-lg text-white"
-        style="background:linear-gradient(135deg,#6366f1,#22d3ee);box-shadow:0 10px 30px rgba(99,102,241,.45)">
-        ➕ Salva allenamento
-      </button>
+      <button id="btnSave" onclick="saveWorkout()" class="press w-full mt-4 py-4 rounded-[24px] font-extrabold text-lg text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee);box-shadow:0 10px 30px rgba(99,102,241,.45)">➕ Salva allenamento</button>
       <p id="selectionSummary" class="text-center text-xs text-slate-400 mt-2"></p>
     </div>
 
-    <div class="glass bubble p-5">
-      <h3 class="font-bold">🕘 Oggi</h3>
+    <div class="glass rounded-3xl p-5">
+      <h3 class="font-bold">🕘 Ultimi allenamenti</h3>
       <div id="todayList" class="mt-2 space-y-2 text-sm"></div>
     </div>
   </section>
 
-  <!-- ============ PAGE: STORICO ============ -->
-  <section id="page-storico" class="page mt-4 space-y-4">
-    <div class="glass bubble p-5">
-      <h2 class="font-bold text-lg">📜 Storico</h2>
-      <div id="filterRow" class="flex gap-2 mt-3 overflow-x-auto no-scrollbar pb-1"></div>
-      <div id="historyList" class="mt-3 space-y-4"></div>
-    </div>
-  </section>
-
-  <!-- ============ PAGE: STATS ============ -->
+  <!-- TAB 2: STATISTICHE -->
   <section id="page-stats" class="page mt-4 space-y-4">
     <div class="grid grid-cols-2 gap-3">
-      <div class="glass bubble p-4">
+      <div class="glass rounded-3xl p-4">
         <p class="text-[11px] uppercase tracking-widest text-slate-400">Reps settimana</p>
         <p id="statWeeklyReps" class="text-3xl font-extrabold text-indigo-300">0</p>
         <p id="statWeeklySub" class="text-[11px] text-slate-400"></p>
       </div>
-      <div class="glass bubble p-4">
-        <p class="text-[11px] uppercase tracking-widest text-slate-400">Plank settimana</p>
-        <p class="text-3xl font-extrabold text-cyan-300"><span id="statWeeklySec">0</span><span class="text-sm">s</span></p>
-        <p id="statPlankSub" class="text-[11px] text-slate-400"></p>
+      <div class="glass rounded-3xl p-4">
+        <p class="text-[11px] uppercase tracking-widest text-slate-400">Streak</p>
+        <p class="text-3xl font-extrabold text-orange-400"><span id="statStreak">0</span><span class="text-base">🔥</span></p>
+        <p class="text-[11px] text-slate-400">giorni consecutivi</p>
       </div>
     </div>
-
-    <div class="glass bubble p-5">
+    <div class="glass rounded-3xl p-5">
       <div class="flex items-end justify-between">
         <h3 class="font-bold">🎯 Obiettivo settimanale</h3>
         <span id="goalPct" class="text-sm font-extrabold text-emerald-300">0%</span>
@@ -204,30 +153,22 @@ tailwind.config = {
       </div>
       <p id="goalText" class="text-xs text-slate-400 mt-2"></p>
     </div>
-
-    <div class="glass bubble p-5">
-      <h3 class="font-bold">📊 Ultimi 7 giorni <span class="text-xs font-normal text-slate-400">(volume = reps × sets)</span></h3>
+    <div class="glass rounded-3xl p-5">
+      <h3 class="font-bold">📊 Ultimi 7 giorni <span class="text-xs font-normal text-slate-400">(volume = valore × sets)</span></h3>
       <div id="chart7" class="flex items-end gap-2 h-36 mt-4"></div>
       <div id="chart7labels" class="flex gap-2 mt-1"></div>
     </div>
-
-    <div class="glass bubble p-5">
+    <div class="glass rounded-3xl p-5">
       <h3 class="font-bold">🏆 Record personali (PR)</h3>
       <p class="text-xs text-slate-400">Miglior valore per singola serie</p>
       <div id="prList" class="mt-3 space-y-2"></div>
     </div>
-
-    <div class="glass bubble p-5">
-      <h3 class="font-bold">🍩 Volume per categoria</h3>
-      <div id="catDist" class="mt-3 space-y-2.5"></div>
-    </div>
   </section>
 
-  <!-- ============ PAGE: PROFILO ============ -->
+  <!-- TAB 3: PROFILO -->
   <section id="page-profilo" class="page mt-4 space-y-4">
-    <div class="glass bubble p-5 text-center">
-      <div id="profileAvatarBig" class="w-20 h-20 mx-auto rounded-[28px] flex items-center justify-center text-5xl"
-           style="background:linear-gradient(135deg,#6366f1,#22d3ee)">💪</div>
+    <div class="glass rounded-3xl p-5 text-center">
+      <div id="profileAvatarBig" class="w-20 h-20 mx-auto rounded-[28px] flex items-center justify-center text-5xl" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">💪</div>
       <h2 id="profileNameBig" class="font-extrabold text-xl mt-2">Atleta</h2>
       <p id="profileLevelBig" class="text-xs text-indigo-300 font-bold uppercase tracking-widest">Intermedio</p>
       <div class="grid grid-cols-3 gap-2 mt-4">
@@ -236,62 +177,43 @@ tailwind.config = {
         <div class="glass bubble-sm p-3"><p id="pfTotal" class="font-extrabold text-lg text-cyan-300">0</p><p class="text-[10px] text-slate-400">volume tot</p></div>
       </div>
     </div>
-
-    <div class="glass bubble p-5 space-y-3">
+    <div class="glass rounded-3xl p-5 space-y-3">
       <h3 class="font-bold">✏️ Personalizza</h3>
-      <div>
-        <label class="text-xs text-slate-300 font-semibold">Nome</label>
-        <input id="pfName" type="text" maxlength="60" placeholder="Il tuo nome"
-          class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 font-semibold outline-none focus:border-indigo-400" />
-      </div>
-      <div>
-        <label class="text-xs text-slate-300 font-semibold">Obiettivo settimanale (ripetizioni)</label>
-        <input id="pfGoal" type="number" min="10" max="100000" step="10"
-          class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 font-bold outline-none focus:border-indigo-400" />
-      </div>
-      <div>
-        <label class="text-xs text-slate-300 font-semibold">Livello</label>
+      <div><label class="text-xs font-semibold text-slate-300">Nome</label>
+        <input id="pfName" type="text" maxlength="60" class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 font-semibold outline-none focus:border-indigo-400" /></div>
+      <div><label class="text-xs font-semibold text-slate-300">Obiettivo settimanale (reps)</label>
+        <input id="pfGoal" type="number" min="10" max="100000" step="10" class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 font-bold outline-none focus:border-indigo-400" /></div>
+      <div><label class="text-xs font-semibold text-slate-300">Livello</label>
         <select id="pfLevel" class="mt-1 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 font-semibold outline-none">
           <option>Principiante</option><option>Intermedio</option><option>Avanzato</option><option>Bestia 🔥</option>
-        </select>
-      </div>
-      <div>
-        <label class="text-xs text-slate-300 font-semibold">Avatar</label>
-        <div id="avatarRow" class="flex gap-2 mt-1 flex-wrap"></div>
-      </div>
-      <button onclick="saveProfile()" class="press w-full py-3.5 rounded-[22px] font-extrabold text-white"
-        style="background:linear-gradient(135deg,#6366f1,#22d3ee)">💾 Salva profilo</button>
+        </select></div>
+      <div><label class="text-xs font-semibold text-slate-300">Avatar</label>
+        <div id="avatarRow" class="flex gap-2 mt-1 flex-wrap"></div></div>
+      <button onclick="saveProfile()" class="press w-full py-3.5 rounded-[22px] font-extrabold text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">💾 Salva profilo</button>
     </div>
-
-    <div class="glass bubble p-5">
+    <div class="glass rounded-3xl p-5">
       <h3 class="font-bold">⚙️ Dati</h3>
       <div class="flex gap-2 mt-2">
         <button onclick="reloadAll()" class="press flex-1 glass bubble-sm py-2.5 text-sm font-bold">🔄 Ricarica</button>
         <button onclick="exportCSV()" class="press flex-1 glass bubble-sm py-2.5 text-sm font-bold">📥 Export CSV</button>
       </div>
-      <p class="text-[11px] text-slate-500 mt-3">Backend: <code>/api/workouts</code> · DB: Neon PostgreSQL · Fallback offline in localStorage se il server non risponde.</p>
     </div>
   </section>
 </div>
 
-<!-- TAB BAR iOS -->
 <nav class="fixed bottom-0 inset-x-0 z-20">
   <div class="max-w-md mx-auto px-4 pb-4" style="padding-bottom:calc(1rem + env(safe-area-inset-bottom))">
     <div class="glass flex justify-around items-center px-2 py-2.5" style="border-radius:28px">
-      <button onclick="switchTab('registra')" data-tab="registra" class="tab-btn active flex flex-col items-center gap-1 px-4 py-1">
-        <span class="tab-icon w-11 h-8 rounded-2xl flex items-center justify-center text-xl bg-white/5">⚡</span>
-        <span class="text-[10px] font-bold">Registra</span>
+      <button onclick="switchTab('workout')" data-tab="workout" class="tab-btn active flex flex-col items-center gap-1 px-6 py-1">
+        <span class="tab-icon w-12 h-8 rounded-2xl flex items-center justify-center text-xl bg-white/5">🏋️‍♂️</span>
+        <span class="text-[10px] font-bold">Workout</span>
       </button>
-      <button onclick="switchTab('storico')" data-tab="storico" class="tab-btn flex flex-col items-center gap-1 px-4 py-1">
-        <span class="tab-icon w-11 h-8 rounded-2xl flex items-center justify-center text-xl bg-white/5">📜</span>
-        <span class="text-[10px] font-bold">Storico</span>
-      </button>
-      <button onclick="switchTab('stats')" data-tab="stats" class="tab-btn flex flex-col items-center gap-1 px-4 py-1">
-        <span class="tab-icon w-11 h-8 rounded-2xl flex items-center justify-center text-xl bg-white/5">📊</span>
+      <button onclick="switchTab('stats')" data-tab="stats" class="tab-btn flex flex-col items-center gap-1 px-6 py-1">
+        <span class="tab-icon w-12 h-8 rounded-2xl flex items-center justify-center text-xl bg-white/5">📊</span>
         <span class="text-[10px] font-bold">Stats</span>
       </button>
-      <button onclick="switchTab('profilo')" data-tab="profilo" class="tab-btn flex flex-col items-center gap-1 px-4 py-1">
-        <span class="tab-icon w-11 h-8 rounded-2xl flex items-center justify-center text-xl bg-white/5">👤</span>
+      <button onclick="switchTab('profilo')" data-tab="profilo" class="tab-btn flex flex-col items-center gap-1 px-6 py-1">
+        <span class="tab-icon w-12 h-8 rounded-2xl flex items-center justify-center text-xl bg-white/5">👤</span>
         <span class="text-[10px] font-bold">Profilo</span>
       </button>
     </div>
@@ -301,365 +223,187 @@ tailwind.config = {
 <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-28 z-30 px-5 py-3 rounded-2xl font-bold text-sm opacity-0 pointer-events-none glass">✅</div>
 
 <script>
-/* ================= DATA ================= */
 const EXERCISES = {
-  'Flessioni':   { icon: '💪', color: '#6366f1', variants: ['Classiche','Larghe (Wide)','Strette (Close)','Diamond','Decline','Incline'], metric: 'reps' },
-  'Addominali':  { icon: '🔥', color: '#f59e0b', variants: ['Bassi (Leg raises)','Alti (Crunch)','Isometrici / Altri','Sit-up','Russian twist'], metric: 'reps' },
-  'Plank':       { icon: '⏱️', color: '#22d3ee', variants: ['Normale','Laterale','Dinamico'], metric: 'seconds' },
-  'Trazioni':    { icon: '🧗', color: '#a855f7', variants: ['Pronate','Supine','Neutre','Wide grip','Archer','Australian'], metric: 'reps' },
-  'Chin-up':     { icon: '🏋️', color: '#34d399', variants: ['Classiche','Close grip','L-sit chin-up','Commando','Negative'], metric: 'reps' },
+  'Flessioni':  { icon:'💪', color:'#6366f1', metric:'reps',    variants:['Larghe (Wide)','Strette (Close)','Diamond','Classiche','Decline','Incline'] },
+  'Addominali': { icon:'🔥', color:'#f59e0b', metric:'reps',    variants:['Bassi','Alti','Isometrici'] },
+  'Plank':      { icon:'⏱️', color:'#22d3ee', metric:'seconds', variants:['Normale','Laterale','Dinamico'] },
+  'Trazioni':   { icon:'🧗', color:'#a855f7', metric:'reps',    variants:['Pronate','Supine','Neutre','Wide','Archer'] },
+  'Chin-up':    { icon:'🏋️', color:'#34d399', metric:'reps',    variants:['Classiche','Close grip','L-sit','Commando'] },
 };
 const AVATARS = ['💪','🔥','🧗','🏋️','⚡','🐺','🦍','🥷','🚀','🐉'];
-const LS_W = 'hg_workouts_v1', LS_P = 'hg_profile_v1';
+const LS_W='hg_workouts_v1', LS_P='hg_profile_v1';
+let state = { category:'Flessioni', variant:'Larghe (Wide)', avatar:'💪',
+  workouts:[], profile:{ name:'Atleta', weekly_goal:500, avatar:'💪', level:'Intermedio' } };
+let dateEditable = false;
 
-let state = {
-  category: 'Flessioni',
-  variant: 'Classiche',
-  avatar: '💪',
-  workouts: [],
-  profile: { name: 'Atleta', weekly_goal: 500, avatar: '💪', level: 'Intermedio' },
-  filter: 'all',
-  online: true,
-};
-
-/* ================= HELPERS ================= */
 const $ = id => document.getElementById(id);
 const todayISO = () => new Date().toISOString().slice(0,10);
 const fmtDate = iso => new Date(iso+'T12:00:00').toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'});
-const esc = s => String(s??'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const esc = s => String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function toast(msg,ok=true){ const t=$('toast'); t.textContent=msg;
+  t.style.borderColor=ok?'rgba(52,211,153,.4)':'rgba(248,113,113,.4)';
+  t.style.opacity='1'; t.style.transform='translate(-50%,-8px)';
+  clearTimeout(t._h); t._h=setTimeout(()=>{t.style.opacity='0';t.style.transform='translate(-50%,0)'},2200); }
+async function apiFetch(path,opts={}){ const r=await fetch(path,{headers:{'Content-Type':'application/json'},...opts});
+  const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.error||('HTTP '+r.status)); return d; }
 
-function toast(msg, ok=true){
-  const t = $('toast');
-  t.textContent = msg;
-  t.style.borderColor = ok ? 'rgba(52,211,153,.4)' : 'rgba(248,113,113,.4)';
-  t.style.opacity = '1'; t.style.transform = 'translate(-50%,-8px)';
-  clearTimeout(t._h);
-  t._h = setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translate(-50%,0)'; }, 2200);
-}
-
-async function apiFetch(path, opts={}){
-  const r = await fetch(path, { headers: {'Content-Type':'application/json'}, ...opts });
-  const data = await r.json().catch(()=>({}));
-  if (!r.ok) throw new Error(data.error || ('HTTP '+r.status));
-  return data;
-}
-
-/* ================= INIT ================= */
-document.addEventListener('DOMContentLoaded', () => {
-  $('inDate').value = todayISO();
-  $('headerDate').textContent = new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
-  buildCategories(); buildVariants(); buildAvatarRow(); buildFilters();
-  $('inValue').addEventListener('input', updateSummary);
-  $('inSets').addEventListener('input', updateSummary);
-  loadLocal(); renderAll();
-  reloadAll();
+document.addEventListener('DOMContentLoaded',()=>{
+  $('inDate').value=todayISO();
+  $('headerDate').textContent=new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+  buildCategories(); buildVariants(); buildAvatarRow();
+  $('inValue').addEventListener('input',updateSummary);
+  $('inSets').addEventListener('input',updateSummary);
+  loadLocal(); renderAll(); reloadAll();
 });
-
-function loadLocal(){
-  try {
-    const w = JSON.parse(localStorage.getItem(LS_W) || '[]');
-    if (Array.isArray(w)) state.workouts = w;
-    const p = JSON.parse(localStorage.getItem(LS_P) || 'null');
-    if (p) { state.profile = { ...state.profile, ...p }; state.avatar = state.profile.avatar; }
-  } catch(e){}
-}
-function persistLocal(){
-  try {
-    localStorage.setItem(LS_W, JSON.stringify(state.workouts));
-    localStorage.setItem(LS_P, JSON.stringify(state.profile));
-  } catch(e){}
-}
+function loadLocal(){ try{
+  const w=JSON.parse(localStorage.getItem(LS_W)||'[]'); if(Array.isArray(w)) state.workouts=w;
+  const p=JSON.parse(localStorage.getItem(LS_P)||'null'); if(p){state.profile={...state.profile,...p};state.avatar=state.profile.avatar;}
+}catch(e){} }
+function persistLocal(){ try{ localStorage.setItem(LS_W,JSON.stringify(state.workouts)); localStorage.setItem(LS_P,JSON.stringify(state.profile)); }catch(e){} }
 
 async function reloadAll(){
-  try {
-    const [{ workouts }, { profile }] = await Promise.all([
-      apiFetch('/api/workouts?limit=500'),
-      apiFetch('/api/workouts?type=profile'),
-    ]);
-    state.online = true;
-    if (Array.isArray(workouts)) state.workouts = workouts;
-    if (profile) { state.profile = profile; state.avatar = profile.avatar; }
-    $('statusBanner').classList.add('hidden');
-    persistLocal();
-  } catch(e) {
-    state.online = false;
-    const b = $('statusBanner');
-    b.classList.remove('hidden');
-    b.textContent = '⚠️ Offline / DB non raggiungibile — uso i dati locali. (' + esc(e.message) + ')';
-  }
+  try{
+    const [{workouts},{profile}]=await Promise.all([apiFetch('/api/workouts?limit=500'),apiFetch('/api/workouts?type=profile')]);
+    if(Array.isArray(workouts)) state.workouts=workouts;
+    if(profile){state.profile=profile;state.avatar=profile.avatar;}
+    $('statusBanner').classList.add('hidden'); persistLocal();
+  }catch(e){ const b=$('statusBanner'); b.classList.remove('hidden');
+    b.textContent='⚠️ Offline / DB non raggiungibile — uso dati locali. ('+esc(e.message)+')'; }
   renderAll();
 }
 
-/* ================= REGISTRA UI ================= */
+/* ---- form ---- */
 function buildCategories(){
-  $('catGrid').innerHTML = Object.entries(EXERCISES).map(([cat,info]) => `
-    <button onclick="selectCategory('${esc(cat)}')" data-cat="${esc(cat)}"
-      class="cat-btn press glass bubble-sm p-3.5 text-left ${cat===state.category?'active':''}">
-      <div class="text-2xl">${info.icon}</div>
-      <div class="font-extrabold text-sm mt-1">${esc(cat)}</div>
-      <div class="text-[10px] opacity-70">${info.metric==='seconds'?'secondi ⏱️':'ripetizioni 🔁'}</div>
-    </button>`).join('');
+  $('catGrid').innerHTML=Object.entries(EXERCISES).map(([c,i])=>
+    `<button onclick="selectCategory('${esc(c)}')" class="cat-btn press glass bubble-sm p-3.5 text-left ${c===state.category?'active':''}">
+      <div class="text-2xl">${i.icon}</div><div class="font-extrabold text-sm mt-1">${esc(c)}</div>
+      <div class="text-[10px] opacity-70">${i.metric==='seconds'?'secondi ⏱️':'ripetizioni 🔁'}</div></button>`).join('');
 }
 function buildVariants(){
-  const info = EXERCISES[state.category];
-  $('varGrid').innerHTML = info.variants.map(v => `
-    <button onclick="selectVariant('${esc(v)}')" data-var="${esc(v)}"
-      class="var-btn press glass bubble-sm px-4 py-2.5 text-sm font-bold ${v===state.variant?'active':''}">${esc(v)}</button>`).join('');
-  const isSec = info.metric === 'seconds';
-  $('unitBadge').textContent = isSec ? '⏱️ secondi' : '🔁 reps';
-  $('valueLabel').textContent = isSec ? 'Secondi / serie' : 'Ripetizioni / serie';
-  const q = $('quickUnit'); if (q) q.textContent = isSec ? 'secondi ⏱️' : 'reps 🔁';
+  const info=EXERCISES[state.category];
+  $('varGrid').innerHTML=info.variants.map(v=>
+    `<button onclick="selectVariant('${esc(v)}')" class="var-btn press glass bubble-sm px-4 py-2.5 text-sm font-bold ${v===state.variant?'active':''}">${esc(v)}</button>`).join('');
+  const sec=info.metric==='seconds';
+  $('unitBadge').textContent=sec?'⏱️ secondi':'🔁 reps';
+  $('valueLabel').textContent=sec?'Secondi / serie':'Ripetizioni / serie';
+  $('quickUnit').textContent=sec?'secondi ⏱️':'reps 🔁';
   updateSummary();
 }
-function selectCategory(c){ state.category = c; state.variant = EXERCISES[c].variants[0]; buildCategories(); buildVariants(); }
-function selectVariant(v){ state.variant = v; buildVariants(); }
+function selectCategory(c){ state.category=c; state.variant=EXERCISES[c].variants[0]; buildCategories(); buildVariants(); }
+function selectVariant(v){ state.variant=v; buildVariants(); }
 function updateSummary(){
-  const m = EXERCISES[state.category].metric;
-  const v = $('inValue')?.value || '?', s = $('inSets')?.value || '?';
-  const unit = m==='seconds' ? 's' : 'reps';
-  $('selectionSummary').textContent = `${EXERCISES[state.category].icon} ${state.category} · ${state.variant} → ${v}${unit} × ${s} set`;
+  const m=EXERCISES[state.category].metric, v=$('inValue')?.value||'?', s=$('inSets')?.value||'?';
+  $('selectionSummary').textContent=`${EXERCISES[state.category].icon} ${state.category} · ${state.variant} → ${v}${m==='seconds'?'s':' reps'} × ${s} set`;
 }
-function quickAdjust(field, d){
-  const el = field==='value' ? $('inValue') : $('inSets');
-  const max = field==='value' ? 10000 : 100;
-  const cur = parseInt(el.value||'0',10) || 0;
-  el.value = Math.min(max, Math.max(1, cur + d));
-  bump(el);
-  updateSummary();
-}
-function quickAdd(field, d){ quickAdjust(field, d); }
-function quickSet(field, v){
-  const el = field==='value' ? $('inValue') : $('inSets');
-  el.value = v;
-  bump(el);
-  updateSummary();
-}
-function bump(el){
-  el.style.transform = 'scale(1.06)';
-  el.style.borderColor = 'rgba(99,102,241,.7)';
-  setTimeout(()=>{ el.style.transform=''; el.style.borderColor=''; }, 150);
-}
-let dateEditable = false;
-function toggleDateEdit(){
-  dateEditable = !dateEditable;
-  const t = $('dateToggle'), knob = $('dateKnob');
-  t.setAttribute('aria-pressed', dateEditable);
-  t.style.background = dateEditable ? 'linear-gradient(135deg,#6366f1,#22d3ee)' : 'rgba(255,255,255,.15)';
-  knob.style.left = dateEditable ? '22px' : '2px';
-  $('inDate').disabled = !dateEditable;
-  $('dateToggleLabel').textContent = dateEditable ? 'Modifica data' : 'Oggi (auto)';
-  if (!dateEditable) $('inDate').value = todayISO();
-}
+function quickAdjust(f,d){ const el=f==='value'?$('inValue'):$('inSets'); const max=f==='value'?10000:100;
+  el.value=Math.min(max,Math.max(1,(parseInt(el.value||'0',10)||0)+d)); bump(el); updateSummary(); }
+function quickSet(f,v){ const el=f==='value'?$('inValue'):$('inSets'); el.value=v; bump(el); updateSummary(); }
+function bump(el){ el.style.transform='scale(1.06)'; el.style.borderColor='rgba(99,102,241,.7)';
+  setTimeout(()=>{el.style.transform='';el.style.borderColor='';},150); }
+function toggleDateEdit(){ dateEditable=!dateEditable;
+  $('datePill').style.background=dateEditable?'linear-gradient(135deg,#6366f1,#22d3ee)':'rgba(255,255,255,.15)';
+  $('dateKnob').style.left=dateEditable?'22px':'2px';
+  $('inDate').disabled=!dateEditable;
+  $('dateToggle').setAttribute('aria-pressed',dateEditable);
+  $('dateToggleLabel').textContent=dateEditable?'Modifica data':'Oggi (auto)';
+  if(!dateEditable) $('inDate').value=todayISO(); }
 
 async function saveWorkout(){
-  const metric = EXERCISES[state.category].metric;
-  const payload = {
-    exercise_category: state.category,
-    exercise_name: state.variant,
-    metric_type: metric,
-    value_count: parseInt($('inValue').value,10),
-    sets: parseInt($('inSets').value,10),
-    date: $('inDate').value || todayISO(),
-  };
-  if (!payload.value_count || payload.value_count <= 0) return toast('❌ Inserisci un valore valido', false);
-  if (!payload.sets || payload.sets <= 0) return toast('❌ Serie non valide', false);
-
-  $('btnSave').disabled = true;
-  try {
-    const { workout } = await apiFetch('/api/workouts', { method:'POST', body: JSON.stringify(payload) });
-    state.workouts.unshift(workout);
-    toast(`✅ Salvato: ${workout.exercise_name} × ${workout.sets}`);
-  } catch(e) {
-    // fallback offline
-    state.workouts.unshift({ id: Date.now(), ...payload, created_at: new Date().toISOString() });
-    toast('📴 Salvato in locale (offline)', true);
-  }
-  persistLocal(); renderAll();
-  $('btnSave').disabled = false;
+  const metric=EXERCISES[state.category].metric;
+  const payload={ exercise_category:state.category, exercise_name:state.variant, metric_type:metric,
+    value_count:parseInt($('inValue').value,10), sets:parseInt($('inSets').value,10),
+    date:$('inDate').value||todayISO(), notes:$('inNotes').value.trim() };
+  if(!payload.value_count||payload.value_count<=0) return toast('❌ Valore non valido',false);
+  if(!payload.sets||payload.sets<=0) return toast('❌ Serie non valide',false);
+  $('btnSave').disabled=true;
+  try{ const {workout}=await apiFetch('/api/workouts',{method:'POST',body:JSON.stringify(payload)});
+    state.workouts.unshift(workout); toast(`✅ Salvato: ${workout.exercise_name} × ${workout.sets}`);
+    $('inNotes').value='';
+  }catch(e){ state.workouts.unshift({id:Date.now(),...payload,created_at:new Date().toISOString()});
+    toast('📴 Salvato in locale (offline)'); }
+  persistLocal(); renderAll(); $('btnSave').disabled=false;
 }
+async function deleteWorkout(id){ if(!confirm('Eliminare?'))return;
+  try{await apiFetch('/api/workouts?id='+id,{method:'DELETE'});}catch(e){}
+  state.workouts=state.workouts.filter(w=>w.id!==id); persistLocal(); renderAll(); toast('🗑️ Eliminata'); }
 
-async function deleteWorkout(id){
-  if (!confirm('Eliminare questa sessione?')) return;
-  try { await apiFetch('/api/workouts?id='+id, { method:'DELETE' }); }
-  catch(e){ /* ok anche offline */ }
-  state.workouts = state.workouts.filter(w => w.id !== id);
-  persistLocal(); renderAll(); toast('🗑️ Eliminata');
-}
+function switchTab(n){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-'+n).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===n));
+  window.scrollTo({top:0,behavior:'smooth'}); }
 
-/* ================= TABS ================= */
-function switchTab(name){
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  $('page-'+name).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* ================= STORICO ================= */
-function buildFilters(){
-  const cats = ['all', ...Object.keys(EXERCISES)];
-  $('filterRow').innerHTML = cats.map(c => `
-    <button onclick="setFilter('${esc(c)}')" class="press shrink-0 px-4 py-2 text-xs font-extrabold bubble-sm glass ${state.filter===c?'!bg-white !text-slate-900':''}">
-      ${c==='all'?'Tutti':EXERCISES[c].icon+' '+esc(c)}</button>`).join('');
-}
-function setFilter(c){ state.filter = c; buildFilters(); renderHistory(); }
-
-function tagColor(cat){ return (EXERCISES[cat]||{}).color || '#64748b'; }
-
-function renderHistory(){
-  const list = state.workouts.filter(w => state.filter==='all' || w.exercise_category===state.filter);
-  if (!list.length) { $('historyList').innerHTML = `<p class="text-sm text-slate-400 text-center py-6">Nessun allenamento. Vai su ⚡ Registra!</p>`; return; }
-  const groups = {};
-  list.forEach(w => { (groups[w.date] = groups[w.date] || []).push(w); });
-  const days = Object.keys(groups).sort().reverse();
-  $('historyList').innerHTML = days.map(d => `
-    <div>
-      <p class="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-2">📅 ${fmtDate(d)}</p>
-      <div class="space-y-2">
-      ${groups[d].map(w => `
-        <div class="glass bubble-sm p-3.5 flex items-center gap-3">
-          <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full shrink-0" style="background:${tagColor(w.exercise_category)}22;color:${tagColor(w.exercise_category)};border:1px solid ${tagColor(w.exercise_category)}55">${esc(w.exercise_category)}</span>
-          <div class="flex-1 min-w-0">
-            <p class="font-bold text-sm truncate">${esc(w.exercise_name)}</p>
-            <p class="text-xs text-slate-400">${w.metric_type==='seconds'?('⏱️ '+w.value_count+'s × '+w.sets+' (tot '+(w.value_count*w.sets)+'s)'):('🔁 '+w.value_count+' × '+w.sets+' (tot '+(w.value_count*w.sets)+')')}</p>
-          </div>
-          <button onclick="deleteWorkout(${w.id})" class="press text-slate-500 hover:text-red-400 text-lg px-1">✕</button>
-        </div>`).join('')}
-      </div>
-    </div>`).join('');
-}
-
-/* ================= STATS ================= */
-function weekStart(){ const n = new Date(); n.setHours(0,0,0,0); const dow = (n.getDay()+6)%7; n.setDate(n.getDate()-dow); return n; }
-function inThisWeek(dateISO){ const d = new Date(dateISO+'T12:00:00'); return d >= weekStart(); }
-
-function calcStreak(){
-  const days = [...new Set(state.workouts.map(w => w.date))].sort().reverse();
-  if (!days.length) return 0;
-  let streak = 0; let cursor = new Date();
-  const hasToday = days.includes(todayISO());
-  if (!hasToday) cursor.setDate(cursor.getDate()-1);
-  while (true) {
-    const iso = cursor.toISOString().slice(0,10);
-    if (days.includes(iso)) { streak++; cursor.setDate(cursor.getDate()-1); }
-    else break;
-  }
-  return streak;
-}
+/* ---- stats ---- */
+function weekStart(){ const n=new Date(); n.setHours(0,0,0,0); n.setDate(n.getDate()-((n.getDay()+6)%7)); return n; }
+function calcStreak(){ const days=[...new Set(state.workouts.map(w=>w.date))].sort().reverse();
+  if(!days.length) return 0; let s=0; const c=new Date();
+  if(!days.includes(todayISO())) c.setDate(c.getDate()-1);
+  while(days.includes(c.toISOString().slice(0,10))){s++;c.setDate(c.getDate()-1);} return s; }
 
 function renderStats(){
-  const weekly = state.workouts.filter(w => inThisWeek(w.date));
-  const reps = weekly.filter(w=>w.metric_type!=='seconds').reduce((s,w)=>s+w.value_count*w.sets,0);
-  const secs = weekly.filter(w=>w.metric_type==='seconds').reduce((s,w)=>s+w.value_count*w.sets,0);
-  $('statWeeklyReps').textContent = reps.toLocaleString('it-IT');
-  $('statWeeklySub').textContent = weekly.length + ' sessioni questa settimana';
-  $('statWeeklySec').textContent = secs.toLocaleString('it-IT');
-  $('statPlankSub').textContent = '= ' + Math.floor(secs/60) + ' min di plank';
-
-  const goal = Math.max(1, state.profile.weekly_goal || 500);
-  const pct = Math.min(100, Math.round(reps/goal*100));
-  $('goalBar').style.width = pct + '%';
-  $('goalPct').textContent = pct + '%';
-  $('goalText').textContent = `${reps.toLocaleString('it-IT')} / ${goal.toLocaleString('it-IT')} reps · ${pct>=100?'🎉 Obiettivo raggiunto!':'ancora '+(goal-reps).toLocaleString('it-IT')+' reps'}`;
-
-  // chart 7 giorni
-  const labels = [], vals = [];
-  for (let i=6;i>=0;i--){ const d = new Date(); d.setDate(d.getDate()-i); const iso = d.toISOString().slice(0,10);
+  const weekly=state.workouts.filter(w=>new Date(w.date+'T12:00:00')>=weekStart());
+  const reps=weekly.filter(w=>w.metric_type!=='seconds').reduce((s,w)=>s+w.value_count*w.sets,0);
+  $('statWeeklyReps').textContent=reps.toLocaleString('it-IT');
+  $('statWeeklySub').textContent=weekly.length+' sessioni · '+weekly.filter(w=>w.metric_type==='seconds').reduce((s,w)=>s+w.value_count*w.sets,0)+'s plank';
+  $('statStreak').textContent=calcStreak();
+  const goal=Math.max(1,state.profile.weekly_goal||500), pct=Math.min(100,Math.round(reps/goal*100));
+  $('goalBar').style.width=pct+'%'; $('goalPct').textContent=pct+'%';
+  $('goalText').textContent=`${reps.toLocaleString('it-IT')} / ${goal.toLocaleString('it-IT')} reps · ${pct>=100?'🎉 Obiettivo raggiunto!':'ancora '+(goal-reps).toLocaleString('it-IT')+' reps'}`;
+  const labels=[],vals=[];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const iso=d.toISOString().slice(0,10);
     labels.push(d.toLocaleDateString('it-IT',{weekday:'narrow'}));
-    vals.push(state.workouts.filter(w=>w.date===iso && w.metric_type!=='seconds').reduce((s,w)=>s+w.value_count*w.sets,0));
-  }
-  const max = Math.max(1, ...vals);
-  $('chart7').innerHTML = vals.map((v,i) => `
-    <div class="flex-1 flex flex-col items-center justify-end h-full gap-1">
-      <span class="text-[9px] font-bold text-slate-300">${v||''}</span>
-      <div class="bar-col w-full rounded-t-xl" style="height:${Math.max(4, v/max*100)}%;background:${v===max?'linear-gradient(180deg,#22d3ee,#6366f1)':'rgba(255,255,255,.14)'}" title="${v}"></div>
-    </div>`).join('');
-  $('chart7labels').innerHTML = labels.map(l => `<div class="flex-1 text-center text-[10px] text-slate-500 font-bold">${l}</div>`).join('');
-
-  // PR per variante
-  const pr = {};
-  state.workouts.forEach(w => { const k = w.exercise_category+'|'+w.exercise_name;
-    if (!pr[k] || w.value_count > pr[k].value_count) pr[k] = w; });
-  const prArr = Object.values(pr).sort((a,b)=>b.value_count-a.value_count).slice(0,8);
-  $('prList').innerHTML = prArr.length ? prArr.map(w => `
-    <div class="glass bubble-sm px-3.5 py-2.5 flex items-center gap-2 text-sm">
-      <span>🏆</span>
-      <span class="flex-1 font-semibold truncate">${esc(w.exercise_name)} <span class="text-slate-500 font-normal">· ${esc(w.exercise_category)}</span></span>
-      <span class="font-extrabold ${w.metric_type==='seconds'?'text-cyan-300':'text-indigo-300'}">${w.value_count}${w.metric_type==='seconds'?'s':'×'+w.sets}</span>
-    </div>`).join('') : `<p class="text-sm text-slate-500">Nessun record ancora.</p>`;
-
-  // distribuzione categorie
-  const tot = state.workouts.reduce((s,w)=>s+w.value_count*w.sets,0) || 1;
-  $('catDist').innerHTML = Object.keys(EXERCISES).map(c => {
-    const v = state.workouts.filter(w=>w.exercise_category===c).reduce((s,w)=>s+w.value_count*w.sets,0);
-    const p = Math.round(v/tot*100);
-    return `<div>
-      <div class="flex justify-between text-xs font-bold mb-1"><span>${EXERCISES[c].icon} ${c}</span><span class="text-slate-400">${v.toLocaleString('it-IT')} (${p}%)</span></div>
-      <div class="h-2.5 rounded-full bg-white/10 overflow-hidden"><div class="h-full rounded-full bar-col" style="width:${p}%;background:${EXERCISES[c].color}"></div></div>
-    </div>`;
-  }).join('');
-}
-
-/* ================= PROFILO ================= */
-function buildAvatarRow(){
-  $('avatarRow').innerHTML = AVATARS.map(a => `
-    <button onclick="pickAvatar('${a}')" class="press w-11 h-11 rounded-2xl text-2xl glass ${state.avatar===a?'!bg-white/90':''}">${a}</button>`).join('');
-}
-function pickAvatar(a){ state.avatar = a; buildAvatarRow(); $('profileAvatarBig').textContent = a; }
-
-async function saveProfile(){
-  const payload = {
-    name: $('pfName').value.trim() || 'Atleta',
-    weekly_goal: parseInt($('pfGoal').value,10) || 500,
-    avatar: state.avatar,
-    level: $('pfLevel').value,
-  };
-  try {
-    const { profile } = await apiFetch('/api/workouts?type=profile', { method:'POST', body: JSON.stringify(payload) });
-    state.profile = profile;
-    toast('✅ Profilo salvato');
-  } catch(e) {
-    state.profile = { ...state.profile, ...payload };
-    toast('📴 Profilo salvato in locale', true);
-  }
-  persistLocal(); renderAll();
-}
-
-function renderProfile(){
-  const p = state.profile;
-  $('headerName').textContent = p.name;
-  $('headerAvatar').textContent = p.avatar;
-  $('profileAvatarBig').textContent = p.avatar;
-  $('profileNameBig').textContent = p.name;
-  $('profileLevelBig').textContent = p.level;
-  if (document.activeElement !== $('pfName')) $('pfName').value = p.name;
-  if (document.activeElement !== $('pfGoal')) $('pfGoal').value = p.weekly_goal;
-  $('pfLevel').value = p.level;
-  state.avatar = p.avatar; buildAvatarRow();
-  $('pfWorkouts').textContent = state.workouts.length;
-  $('pfStreak').textContent = calcStreak() + '🔥';
-  $('pfTotal').textContent = state.workouts.reduce((s,w)=>s+w.value_count*w.sets,0).toLocaleString('it-IT');
-  $('headerStreak').textContent = calcStreak();
+    vals.push(state.workouts.filter(w=>w.date===iso).reduce((s,w)=>s+w.value_count*w.sets,0)); }
+  const max=Math.max(1,...vals);
+  $('chart7').innerHTML=vals.map(v=>`<div class="flex-1 flex flex-col items-center justify-end h-full gap-1">
+    <span class="text-[9px] font-bold text-slate-300">${v||''}</span>
+    <div class="bar-col w-full rounded-t-xl" style="height:${Math.max(4,v/max*100)}%;background:${v===max?'linear-gradient(180deg,#22d3ee,#6366f1)':'rgba(255,255,255,.14)'}"></div></div>`).join('');
+  $('chart7labels').innerHTML=labels.map(l=>`<div class="flex-1 text-center text-[10px] text-slate-500 font-bold">${l}</div>`).join('');
+  const pr={}; state.workouts.forEach(w=>{ const k=w.exercise_category+'|'+w.exercise_name;
+    if(!pr[k]||w.value_count>pr[k].value_count) pr[k]=w; });
+  const arr=Object.values(pr).sort((a,b)=>b.value_count-a.value_count).slice(0,10);
+  $('prList').innerHTML=arr.length?arr.map(w=>`<div class="glass bubble-sm px-3.5 py-2.5 flex items-center gap-2 text-sm">
+    <span>🏆</span><span class="flex-1 font-semibold truncate">${esc(w.exercise_name)} <span class="text-slate-500 font-normal">· ${esc(w.exercise_category)}</span></span>
+    <span class="font-extrabold ${w.metric_type==='seconds'?'text-cyan-300':'text-indigo-300'}">${w.value_count}${w.metric_type==='seconds'?'s':'×'+w.sets}</span></div>`).join('')
+    :`<p class="text-sm text-slate-500">Nessun record ancora.</p>`;
 }
 
 function renderToday(){
-  const t = state.workouts.filter(w => w.date === todayISO());
-  $('todayList').innerHTML = t.length ? t.map(w => `
-    <div class="flex items-center gap-2 glass bubble-sm px-3 py-2">
-      <span class="text-xs">${(EXERCISES[w.exercise_category]||{}).icon||'•'}</span>
-      <span class="flex-1 truncate font-semibold">${esc(w.exercise_name)} <span class="text-slate-400 font-normal">· ${w.value_count}${w.metric_type==='seconds'?'s':' reps'} × ${w.sets}</span></span>
-    </div>`).join('') : `<p class="text-slate-500 text-xs py-2">Ancora niente oggi — inizia con una serie! 💪</p>`;
+  const t=[...state.workouts].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  $('todayList').innerHTML=t.length?t.map(w=>`<div class="glass bubble-sm px-3 py-2.5 flex items-center gap-2">
+    <span>${(EXERCISES[w.exercise_category]||{}).icon||'•'}</span>
+    <div class="flex-1 min-w-0"><span class="font-semibold truncate">${esc(w.exercise_name)}</span>
+      <span class="text-slate-400"> · ${w.value_count}${w.metric_type==='seconds'?'s':' reps'} × ${w.sets} · ${fmtDate(w.date)}</span>
+      ${w.notes?`<p class="text-xs text-slate-500 truncate">📝 ${esc(w.notes)}</p>`:''}</div>
+    <button onclick="deleteWorkout(${w.id})" class="press text-slate-500 hover:text-red-400 px-1">✕</button></div>`).join('')
+    :`<p class="text-slate-500 text-xs py-2">Ancora niente — inizia con una serie! 💪</p>`;
 }
 
-function renderAll(){ renderHistory(); renderStats(); renderProfile(); renderToday(); }
-
-function exportCSV(){
-  const rows = [['id','categoria','variante','unita','valore','serie','data']];
-  state.workouts.forEach(w => rows.push([w.id,w.exercise_category,w.exercise_name,w.metric_type,w.value_count,w.sets,w.date]));
-  const csv = rows.map(r => r.map(c => `"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download = 'home-gym-workouts.csv'; a.click();
+/* ---- profilo ---- */
+function buildAvatarRow(){ $('avatarRow').innerHTML=AVATARS.map(a=>
+  `<button onclick="pickAvatar('${a}')" class="press w-11 h-11 rounded-2xl text-2xl glass ${state.avatar===a?'!bg-white/90':''}">${a}</button>`).join(''); }
+function pickAvatar(a){ state.avatar=a; buildAvatarRow(); $('profileAvatarBig').textContent=a; }
+async function saveProfile(){
+  const payload={ name:$('pfName').value.trim()||'Atleta', weekly_goal:parseInt($('pfGoal').value,10)||500, avatar:state.avatar, level:$('pfLevel').value };
+  try{ const {profile}=await apiFetch('/api/workouts?type=profile',{method:'POST',body:JSON.stringify(payload)});
+    state.profile=profile; toast('✅ Profilo salvato');
+  }catch(e){ state.profile={...state.profile,...payload}; toast('📴 Profilo salvato in locale'); }
+  persistLocal(); renderAll();
 }
+function renderProfile(){ const p=state.profile;
+  $('headerName').textContent=p.name; $('headerAvatar').textContent=p.avatar;
+  $('profileAvatarBig').textContent=p.avatar; $('profileNameBig').textContent=p.name; $('profileLevelBig').textContent=p.level;
+  if(document.activeElement!==$('pfName')) $('pfName').value=p.name;
+  if(document.activeElement!==$('pfGoal')) $('pfGoal').value=p.weekly_goal;
+  $('pfLevel').value=p.level; state.avatar=p.avatar; buildAvatarRow();
+  $('pfWorkouts').textContent=state.workouts.length; $('pfStreak').textContent=calcStreak()+'🔥';
+  $('pfTotal').textContent=state.workouts.reduce((s,w)=>s+w.value_count*w.sets,0).toLocaleString('it-IT');
+  $('headerStreak').textContent=calcStreak(); }
+
+function renderAll(){ renderToday(); renderStats(); renderProfile(); }
+function exportCSV(){ const rows=[['id','categoria','variante','unita','valore','serie','data','note']];
+  state.workouts.forEach(w=>rows.push([w.id,w.exercise_category,w.exercise_name,w.metric_type,w.value_count,w.sets,w.date,(w.notes||'').replace(/"/g,'""')]));
+  const csv=rows.map(r=>r.map(c=>`"${c??''}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='home-gym-workouts.csv'; a.click(); }
 </script>
 </body>
 </html>
