@@ -221,7 +221,7 @@ async function saveEntry() {
   const body = { category: TYPE, variant, exercise: TYPE + ' · ' + variant, amount: parseInt($('inAmount').value, 10), unit: info.unit, date: selISO(), username: profile.username, country: profile.country };
   if (!body.amount || body.amount <= 0) return toast('❌ Valore non valido');
   try { const r = await api('/api/workouts', { method: 'POST', body: JSON.stringify(body) }); data.unshift(r.workout); toast(`✅ +${body.amount} · ${variant}`); }
-  catch (e) { data.unshift({ id: Date.now(), ...body, created_at: new Date().toISOString() }); toast('📴 Salvato in locale'); }
+  catch (e) { console.error('POST fallita:', e); data.unshift({ id: Date.now(), ...body, created_at: new Date().toISOString() }); toast('📴 Locale, motivo: ' + e.message); }
   renderStats(); renderHistory();
 }
 async function delEntry(id) {

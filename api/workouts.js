@@ -196,7 +196,10 @@ module.exports = async (req, res) => {
       if (!Number.isFinite(amount) || amount <= 0) return send(res, 400, { error: 'amount deve essere > 0' });
       let d = new Date().toISOString().slice(0, 10);
       if (body.date && /^\d{4}-\d{2}-\d{2}$/.test(body.date)) d = body.date;
-      if (d > new Date().toISOString().slice(0, 10)) return send(res, 400, { error: 'Non puoi registrare nel futuro' });
+      // Il client invia la data locale (il day-nav blocca già il futuro vero):
+      // tollera +1gg rispetto a UTC per i fusi orari avanti (es. dopo mezzanotte in Italia)
+      const utcTomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+      if (d > utcTomorrow) return send(res, 400, { error: 'Non puoi registrare nel futuro' });
       const { rows } = await client.query(
         'INSERT INTO workouts (exercise, category, variant, amount, unit, date, username, country) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
         [exercise, category, variant, amount, body.unit === 'seconds' ? 'seconds' : 'reps', d,
