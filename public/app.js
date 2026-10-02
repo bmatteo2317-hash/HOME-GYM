@@ -66,6 +66,7 @@ async function boot() {
   if (page === 'profile') renderProfilePage();
   if (page === 'exercise') renderExercisePage();
   if (page === 'rank') renderRankPage();
+  if (page === 'stats') renderStatsPage();
 }
 
 /* ---------- PAGINA CLASSIFICHE GLOBALI (tutti e 4 gli esercizi) ---------- */
@@ -109,7 +110,7 @@ async function renderHome() {
     <div class="flex-1"><p class="font-extrabold leading-tight">${calcStreak(me || null)} giorni di fila</p>
     <p class="text-[11px] text-slate-400">${me ? '@' + esc(me) + ' · ' : ''}oggi: ${todayTot} · target ${goal}</p></div>
     <a href="profile.html" class="press glass rounded-2xl px-3 py-2 text-xs font-bold">👤</a>`;
-  renderHomeStats(me);
+  renderHomeStatsSub(me);
   $('homeGrid').innerHTML = Object.entries(TYPES).map(([t, i]) => {
     const rows = data.filter((w) => ofType(w, t));
     const tot = rows.reduce((s, w) => s + w.amount, 0);
@@ -134,41 +135,68 @@ async function renderHome() {
   } catch (e) { $('roomsHome').innerHTML = '<p class="text-xs text-slate-500">Stanze non disponibili offline.</p>'; }
 }
 
-/* Statistiche generali del profilo in home */
-function renderHomeStats(me) {
-  const box = $('homeStats');
-  if (!box) return;
-  const mine = data.filter((w) => !me || w.username === me);
+/* Sottotitolo del pulsante Statistiche in home */
+function renderHomeStatsSub(me) {
+  const sub = $('homeStatsSub');
+  if (!sub) return;
+  sub.textContent = me
+    ? `@${me} · 🔥${calcStreak(me)}gg · target ${goal}/giorno`
+    : 'Streak · volumi · PR · medie';
+}
+
+/* Pagina dedicata: statistiche generali del profilo, layout spazioso */
+function renderStatsPage() {
+  const me = profile.username;
+  $('statsTitle').textContent = me ? `@${me}` : 'Statistiche';
+  $('statsSub').textContent = me
+    ? `${flag(profile.country)} ${profile.country || ''} · target ${goal}/giorno`
+    : 'Imposta il tuo username per statistiche personali';
   if (!me) {
-    $('homeStatsSub').textContent = 'Imposta il tuo username per statistiche personali';
-    box.innerHTML = `<a href="profile.html" class="press glass px-4 py-3 flex items-center gap-2 text-sm font-bold" style="border-radius:18px">👤 Vai al Profilo <span class="ml-auto">›</span></a>`;
+    $('statsBody').innerHTML = `<a href="profile.html" class="press glass rounded-3xl p-6 flex items-center gap-4 w-full">
+      <span class="text-4xl">👤</span>
+      <span class="flex-1 text-left"><span class="font-extrabold text-lg block">Vai al Profilo</span>
+      <span class="text-xs text-slate-400">Username · Stato · obiettivo giornaliero</span></span>
+      <span class="text-slate-500 font-extrabold text-xl">›</span></a>`;
     return;
   }
+  const mine = data.filter((w) => w.username === me);
   const days = new Set(mine.map((w) => w.date)).size;
   const vol = mine.reduce((s, w) => s + w.amount, 0);
   const pr = mine.length ? Math.max(...mine.map((w) => w.amount)) : 0;
   const avg = mine.length ? (vol / mine.length).toFixed(1) : 0;
-  $('homeStatsSub').textContent = `@${me} · ${flag(profile.country)} ${profile.country || ''} · target ${goal}/giorno`;
   const cards = [
-    ['🔥', String(calcStreak(me)), 'gg streak'],
-    ['📦', vol.toLocaleString('it-IT'), 'volume tot'],
-    ['🏆', String(pr), 'PR max'],
+    ['🔥', String(calcStreak(me)), 'giorni streak'],
+    ['📦', vol.toLocaleString('it-IT'), 'volume totale'],
+    ['🏆', String(pr), 'PR massimo'],
     ['📅', String(days), 'giorni attivi'],
-    ['📝', String(mine.length), 'serie'],
-    ['📊', String(avg), 'media/serie'],
+    ['📝', String(mine.length), 'serie totali'],
+    ['📊', String(avg), 'media per serie'],
   ];
-  box.innerHTML = `<div class="grid grid-cols-3 gap-1.5">` + cards.map(([icon, v, l]) =>
-    `<div class="glass px-2 py-2.5 text-center" style="border-radius:16px">
-      <div class="text-base">${icon}</div><div class="font-extrabold leading-tight">${esc(v)}</div>
-      <div class="text-[9px] text-slate-500">${l}</div></div>`).join('') + `</div>
-    <div class="mt-1.5 space-y-1">` + Object.entries(TYPES).map(([t, i]) => {
+  $('statsBody').innerHTML = `<div class="grid grid-cols-2 gap-3">` + cards.map(([icon, v, l]) =>
+    `<div class="glass rounded-3xl p-5 text-center">
+      <div class="text-3xl">${icon}</div><div class="font-extrabold text-2xl mt-1">${esc(v)}</div>
+      <div class="text-[11px] text-slate-400 mt-0.5">${l}</div></div>`).join('') + `</div>
+    <div class="space-y-3 mt-4">` + Object.entries(TYPES).map(([t, i]) => {
       const rows = mine.filter((w) => ofType(w, t));
       const tv = rows.reduce((s, w) => s + w.amount, 0);
       const tp = rows.length ? Math.max(...rows.map((w) => w.amount)) : 0;
+      const ta = rows.length ? (tv / rows.length).toFixed(1) : 0;
       const u = i.unit === 'seconds' ? 's' : '';
-      return `<a href="${i.file}" class="press glass px-3 py-2 flex items-center gap-2 text-xs" style="border-radius:14px">
-        <span>${i.icon}</span><b class="flex-1">${esc(t)}</b>
-        <span class="text-slate-400">Vol <b class="text-slate-100">${tv}${u}</b> · PR <b class="text-amber-300">${tp}${u}</b> · 🔥${calcStreak(me, t)}gg</span></a>`;
+      const maxV = Math.max(1, ...Object.values(TYPES).map(([k]) => mine.filter((w) => ofType(w, k)).reduce((s, w) => s + w.amount, 0)));
+      return `<a href="${i.file}" class="press glass rounded-3xl p-5 block">
+        <div class="flex items-center gap-3">
+          <span class="text-4xl">${i.icon}</span>
+          <span class="flex-1"><span class="font-extrabold text-lg block">${esc(t)}</span>
+          <span class="text-[11px] text-slate-400">${esc(i.desc)} · ${i.variants.length} varianti · 🔥${calcStreak(me, t)}gg</span></span>
+          <span class="text-slate-500 font-extrabold text-xl">›</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 mt-3 text-center">
+          <div class="glass px-2 py-2.5" style="border-radius:16px"><div class="font-extrabold">${tv.toLocaleString('it-IT')}${u}</div><div class="text-[10px] text-slate-500">volume</div></div>
+          <div class="glass px-2 py-2.5" style="border-radius:16px"><div class="font-extrabold text-amber-300">${tp}${u}</div><div class="text-[10px] text-slate-500">PR</div></div>
+          <div class="glass px-2 py-2.5" style="border-radius:16px"><div class="font-extrabold">${ta}${u}</div><div class="text-[10px] text-slate-500">media</div></div>
+        </div>
+        <div class="h-2.5 mt-3 rounded-full bg-white/10 overflow-hidden"><div class="bar h-full rounded-full" style="width:${Math.round(tv / maxV * 100)}%;background:linear-gradient(90deg,#6366f1,#22d3ee)"></div></div>
+      </a>`;
     }).join('') + `</div>`;
 }
 

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<title>Statistiche · HOME-GYM</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="app.css" />
+</head>
+<body data-page="stats">
+<main class="w-full max-w-sm mx-auto px-3 pt-4 pb-10 space-y-4" style="padding-top:calc(1rem + env(safe-area-inset-top))">
+  <div class="flex items-center gap-2">
+    <a href="index.html" aria-label="Esci e torna alla Home" class="touch press glass rounded-full font-extrabold text-xl" style="width:56px;height:56px;display:flex;align-items:center;justify-content:center">‹</a>
+    <div>
+      <h1 class="font-extrabold text-xl leading-tight">📊 <span id="statsTitle">Statistiche</span></h1>
+      <p id="statsSub" class="text-[11px] text-slate-400"></p>
+    </div>
+  </div>
+  <div id="banner" class="hidden text-xs px-4 py-3 glass rounded-2xl text-amber-300"></div>
+  <div id="statsBody" class="space-y-4"></div>
+</main>
+<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-8 z-30 px-5 py-3 rounded-2xl font-bold text-sm opacity-0 pointer-events-none glass whitespace-nowrap">✅</div>
+<script src="app.js"></script>
+</body>
+</html>
