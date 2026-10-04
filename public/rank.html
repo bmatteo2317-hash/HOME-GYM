@@ -2,57 +2,44 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#000000" />
-<meta name="description" content="HOME-GYM · Calistenica a casa: flessioni, addominali, plank, trazioni." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#04060c" />
+<meta name="description" content="HOME-GYM · Classifiche globali: volume, PR e streak su tutti gli esercizi." />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="HOME-GYM" />
+<meta name="color-scheme" content="dark" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <link rel="icon" href="/favicon.ico" sizes="any" />
 <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
 <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="HOME-GYM" />
 <title>Classifiche · HOME-GYM</title>
-<script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="app.css" />
 </head>
 <body data-page="rank">
-<main class="w-full max-w-sm mx-auto px-3 pt-4 pb-10 space-y-3" style="padding-top:calc(1rem + env(safe-area-inset-top))">
-  <div class="flex items-center gap-2">
-    <a href="index.html" aria-label="Esci e torna alla Home" class="touch press glass rounded-full font-extrabold text-xl" style="width:56px;height:56px;display:flex;align-items:center;justify-content:center">‹</a>
-    <h1 class="font-extrabold text-xl">🏆 Classifiche</h1>
+<div id="app">
+  <div class="topbar"><a class="back glass" href="index.html" aria-label="Torna alla Home">‹</a><div class="logo">🏆 HOME-<span>GYM</span></div><div class="streak-pill" id="streakPill">🔥 0</div></div>
+  <div id="banner" class="hidden card warn"></div>
+  <h1>Sfida il <span class="glow-cyan">mondo.</span></h1>
+  <div class="card"><div class="mu" style="font-size:11px">ESERCIZIO (TUTTI E 4)</div>
+    <select id="rankExG" onchange="loadRank()" style="width:100%;margin-top:6px;min-height:50px;font-weight:700"></select>
+    <div class="mu" style="font-size:11px;margin-top:12px">METRICA</div><div class="chips" style="margin-top:6px"><button id="mVol" class="chipbtn" onclick="setMetric('volume')">📦 Volume</button><button id="mPr" class="chipbtn" onclick="setMetric('pr')">🏆 PR</button><button id="mStreak" class="chipbtn" onclick="setMetric('streak')">🔥 Streak</button></div>
+    <div class="mu" style="font-size:11px">AMBITO</div><div class="chips" style="margin-top:6px"><button id="gGlobal" class="chipbtn" onclick="setScope('global')">🌍</button><button id="gCountry" class="chipbtn" onclick="setScope('country')">🇮🇹</button><button id="gRoom" class="chipbtn" onclick="setScope('room')">🔒</button></div>
+    <div id="periodBlock"><div class="mu" style="font-size:11px">PERIODO</div><div class="chips" style="margin-top:6px"><button id="gToday" class="chipbtn" onclick="setPeriod('today')">Oggi</button><button id="gWeek" class="chipbtn" onclick="setPeriod('week')">Settimana</button><button id="gAll" class="chipbtn" onclick="setPeriod('all')">Sempre</button></div></div>
+    <div id="roomPanel" class="hidden"></div>
+    <p class="mu" id="rankLabel" style="font-size:11px;margin-top:8px"></p>
+    <div class="card" style="padding:6px 14px;margin:8px 0 0"><div id="rankList"></div></div>
   </div>
-  <div id="banner" class="hidden text-xs px-4 py-3 glass rounded-2xl text-amber-300"></div>
-  <div class="glass rounded-3xl p-4">
-    <p class="text-[11px] uppercase tracking-widest text-slate-400 mb-1.5">Esercizio (tutti e 4)</p>
-    <select id="rankExG" onchange="loadRank()" class="touch w-full bg-white/5 border border-white/10 rounded-2xl px-4 outline-none"></select>
-    <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Metrica</p>
-    <div class="grid grid-cols-3 gap-2">
-      <button id="mVol" onclick="setMetric('volume')" class="seg touch press glass rounded-2xl text-xs font-extrabold">📦 Volume</button>
-      <button id="mPr" onclick="setMetric('pr')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🏆 PR</button>
-      <button id="mStreak" onclick="setMetric('streak')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🔥 Streak</button>
-    </div>
-    <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Ambito</p>
-    <div class="grid grid-cols-3 gap-2">
-      <button id="gGlobal" onclick="setScope('global')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🌍</button>
-      <button id="gCountry" onclick="setScope('country')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🇮🇹</button>
-      <button id="gRoom" onclick="setScope('room')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🔒</button>
-    </div>
-    <div id="periodBlock">
-      <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Periodo</p>
-      <div class="grid grid-cols-3 gap-2">
-        <button id="gToday" onclick="setPeriod('today')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Oggi</button>
-        <button id="gWeek" onclick="setPeriod('week')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Settimana</button>
-        <button id="gAll" onclick="setPeriod('all')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Sempre</button>
-      </div>
-    </div>
-    <div id="roomPanel" class="hidden mt-3"></div>
-    <div id="rankList" class="mt-3 space-y-2"></div>
-  </div>
-</main>
-<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-8 z-30 px-5 py-3 rounded-2xl font-bold text-sm opacity-0 pointer-events-none glass whitespace-nowrap">✅</div>
+</div>
+<nav class="tabbar"><div>
+  <a href="index.html"><span>🏠</span>Home</a>
+  <a href="stats.html"><span>📊</span>Stats</a>
+  <a href="profile.html"><span>👤</span>Profilo</a>
+  <a href="rank.html" class="on"><span>🏆</span>Rank</a>
+</div></nav>
+<div id="toast"></div>
 <script src="app.js"></script>
 </body>
 </html>

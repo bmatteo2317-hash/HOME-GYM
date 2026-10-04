@@ -2,122 +2,88 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#000000" />
-<meta name="description" content="HOME-GYM · Calistenica a casa: flessioni, addominali, plank, trazioni." />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#04060c" />
+<meta name="description" content="HOME-GYM · Trazioni: streak, record, obiettivi e timer di recupero. Cloud + offline." />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Trazioni" />
+<meta name="color-scheme" content="dark" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <link rel="icon" href="/favicon.ico" sizes="any" />
 <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
 <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="HOME-GYM" />
 <title>Trazioni · HOME-GYM</title>
-<script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="app.css" />
+<style>:root{--accent:#f472b6}</style>
 </head>
 <body data-page="exercise" data-type="Trazioni">
-<main class="w-full max-w-sm mx-auto px-3 pt-4 pb-32 space-y-3" style="padding-top:calc(1rem + env(safe-area-inset-top))">
-  <div class="flex items-center gap-2">
-    <a href="index.html" aria-label="Esci e torna alla Home" class="touch press glass rounded-full font-extrabold text-xl" style="width:56px;height:56px;display:flex;align-items:center;justify-content:center">‹</a>
-    <h1 class="font-extrabold text-xl">🧗 Trazioni <span class="text-xs font-normal text-slate-400">Pull-ups</span></h1>
-  </div>
-  <div id="banner" class="hidden text-xs px-4 py-3 glass rounded-2xl text-amber-300"></div>
+<div id="app">
+  <div class="topbar"><a class="back glass" href="index.html" aria-label="Torna alla Home">‹</a><div class="logo">🧗 HOME-GYM <span>TRAZIONI</span></div><div class="streak-pill" id="streakPill">🔥 0</div></div>
+  <div id="banner" class="hidden card warn"></div>
 
-  <div id="sub-add" class="subtab active space-y-3">
-    <div class="glass rounded-3xl p-4">
-      <div class="flex items-center justify-between gap-2">
-        <button onclick="moveDay(-1)" class="arrow touch press glass rounded-2xl w-14 text-xl font-extrabold" aria-label="Giorno precedente">‹</button>
-        <div class="flex-1 text-center"><p id="dayLabel" class="font-extrabold">—</p><p id="daySub" class="text-[11px] text-slate-400">—</p></div>
-        <button id="dayNext" onclick="moveDay(1)" class="arrow touch press glass rounded-2xl w-14 text-xl font-extrabold" aria-label="Giorno successivo">›</button>
-      </div>
-    </div>
-    <div class="glass rounded-3xl p-4">
-      <p class="text-[11px] uppercase tracking-widest text-slate-400 mb-1.5">Variante · Trazioni</p>
-      <div id="varGrid" class="flex flex-wrap gap-2"></div>
-      <p id="unitHint" class="text-[11px] font-bold text-indigo-300 mt-2"></p>
-      <div class="flex items-stretch gap-2 mt-2">
-        <button onclick="step(-5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-red-300">−5</button>
-        <input id="inAmount" type="number" value="12" min="1" max="100000" inputmode="numeric" class="w-24 bg-white/5 border border-white/10 rounded-2xl py-3 text-2xl font-extrabold text-center outline-none" />
-        <button onclick="step(5)" class="touch press glass flex-1 rounded-2xl text-lg font-extrabold text-emerald-300">+5</button>
-      </div>
-      <div class="grid grid-cols-3 gap-2 mt-2">
-        <button onclick="step(-1)" class="touch press glass rounded-2xl font-bold">−1</button>
-        <button onclick="step(1)" class="touch press glass rounded-2xl font-bold text-emerald-300">+1</button>
-        <button onclick="step(10)" class="touch press glass rounded-2xl font-bold text-emerald-300">+10</button>
-      </div>
-      <button onclick="saveEntry()" class="touch press w-full mt-3 rounded-[24px] py-4 font-extrabold text-lg text-white" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">➕ Salva</button>
-      <p id="selInfo" class="text-center text-xs text-slate-400 mt-2"></p>
+  <div id="sub-add" class="subtab active">
+    <h1>Oggi <span class="glow-pink">tira.</span></h1>
+    <div class="datebar"><button onclick="moveDay(-1)" aria-label="Giorno precedente">‹</button><div class="dmid" onclick="goToday()" title="Torna a oggi"><b id="dayLabel">—</b><small id="daySub">—</small></div><button id="dayNext" onclick="moveDay(1)" aria-label="Giorno successivo">›</button></div>
+    <div class="card hero"><span class="lbl">Trazioni oggi · Pull-ups</span><b id="heroDay">0</b><div class="meta" id="heroMeta"></div></div>
+    <div class="card" id="goalCard"></div>
+    <p id="streakLine" class="sub"></p>
+    <div class="card" id="timerCard"></div>
+    <div class="card"><div class="cat-head"><div class="cat-name"><span class="dot" style="background:#f472b6;color:#f472b6"></span>Variante <small>Trazioni</small></div></div>
+      <div class="vargrid" id="varGrid"></div>
+      <p class="mu" id="unitHint" style="font-size:11px;font-weight:700"></p>
+      <button class="qadd glass" onclick="openSheet()">⚡ Serie rapida</button>
+      <div class="step-row"><button class="step" onclick="step(-5)" aria-label="Meno 5">−5</button><input id="inAmount" type="number" value="12" min="1" max="100000" inputmode="numeric" aria-label="Ripetizioni" /><button class="step" onclick="step(5)" aria-label="Più 5">+5</button></div>
+      <div class="mini-grid"><button onclick="step(-1)">−1</button><button onclick="step(1)">+1</button><button onclick="step(10)">+10</button></div>
+      <div class="savebar"><button class="pri" onclick="saveEntry()">➕ Salva</button></div>
+      <p class="mu" id="selInfo" style="text-align:center;font-size:12px;margin-top:8px"></p>
     </div>
   </div>
 
-  <div id="sub-stats" class="subtab space-y-3">
-    <div class="glass rounded-3xl p-4">
-      <div class="flex justify-between text-xs"><span>🎯 Target giornaliero</span><b id="goalPct" class="text-emerald-300">0%</b></div>
-      <div class="h-3 mt-1 rounded-full bg-white/10 overflow-hidden"><div id="goalBar" class="bar h-full rounded-full" style="width:0%;background:linear-gradient(90deg,#34d399,#22d3ee)"></div></div>
-      <p id="goalText" class="text-[11px] text-slate-400 mt-1"></p>
-      <p id="streakLine" class="text-[11px] font-bold text-orange-300 mt-1"></p>
-    </div>
-    <div class="glass rounded-3xl p-4">
-      <h2 class="font-bold text-sm">🏆 Record Personale · Trazioni</h2>
-      <div id="prGrid" class="mt-2 space-y-2"></div>
-    </div>
-    <div class="glass rounded-3xl p-4">
-      <div class="flex items-center justify-between"><h2 class="font-bold text-sm">📈 Andamento</h2><div class="flex gap-1"><button onclick="setChartRange('7d')" data-cr="7d" class="seg press glass rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold">7G</button><button onclick="setChartRange('30d')" data-cr="30d" class="seg press glass rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold">30G</button><button onclick="setChartRange('1y')" data-cr="1y" class="seg press glass rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold">1A</button></div></div><p id="chartSub" class="text-[11px] text-slate-500">Ultimi 7 giorni</p>
-      <div id="weekChart" class="flex items-end gap-1.5 h-24 mt-2"></div>
+  <div id="sub-stats" class="subtab">
+    <h1>Numeri <span class="glow-pink">veri.</span></h1>
+    <div class="grid3" id="kpiRow"></div>
+    <h2>🏆 Record personali · Trazioni</h2>
+    <div class="grid3" id="prGrid"></div>
+    <h2>📈 Andamento</h2>
+    <div class="card"><div class="row sp"><b>Grafico</b><div class="chips" style="margin:0"><button class="chipbtn" data-cr="7d" onclick="setChartRange('7d')">7G</button><button class="chipbtn" data-cr="30d" onclick="setChartRange('30d')">30G</button><button class="chipbtn" data-cr="1y" onclick="setChartRange('1y')">1A</button></div></div><p class="mu" id="chartSub" style="font-size:11px">Ultimi 7 giorni</p><div id="chartSvg"></div></div>
+    <div class="card"><b>Andamento settimanale</b><div id="weekSvg" style="margin-top:8px"></div><div class="row sp" id="trendBadge" style="margin-top:10px"></div></div>
+    <h2>🎯 Obiettivi · Trazioni</h2>
+    <div class="card" id="achList"></div>
+  </div>
+
+  <div id="sub-rank" class="subtab">
+    <h1>Sfida il <span class="glow-pink">mondo.</span></h1>
+    <div class="card"><div class="mu" style="font-size:11px">METRICA</div><div class="chips" style="margin-top:6px"><button id="mVol" class="chipbtn" onclick="setMetric('volume')">📦 Volume</button><button id="mPr" class="chipbtn" onclick="setMetric('pr')">🏆 PR</button><button id="mStreak" class="chipbtn" onclick="setMetric('streak')">🔥 Streak</button></div>
+      <div class="mu" style="font-size:11px">AMBITO</div><div class="chips" style="margin-top:6px"><button id="gGlobal" class="chipbtn" onclick="setScope('global')">🌍</button><button id="gCountry" class="chipbtn" onclick="setScope('country')">🇮🇹</button><button id="gRoom" class="chipbtn" onclick="setScope('room')">🔒</button></div>
+      <div id="periodBlock"><div class="mu" style="font-size:11px">PERIODO</div><div class="chips" style="margin-top:6px"><button id="gToday" class="chipbtn" onclick="setPeriod('today')">Oggi</button><button id="gWeek" class="chipbtn" onclick="setPeriod('week')">Settimana</button><button id="gAll" class="chipbtn" onclick="setPeriod('all')">Sempre</button></div></div>
+      <div id="roomPanel" class="hidden"></div>
+      <p class="mu" id="rankLabel" style="font-size:11px;margin-top:8px"></p>
+      <div class="card" style="padding:6px 14px;margin:8px 0 0"><div id="rankList"></div></div>
     </div>
   </div>
 
-  <div id="sub-rank" class="subtab space-y-3">
-    <div class="glass rounded-3xl p-4">
-      <h2 class="font-bold">🏆 Classifica · Trazioni</h2>
-      <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Metrica</p>
-      <div class="grid grid-cols-3 gap-2">
-        <button id="mVol" onclick="setMetric('volume')" class="seg touch press glass rounded-2xl text-xs font-extrabold">📦 Volume</button>
-        <button id="mPr" onclick="setMetric('pr')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🏆 PR</button>
-        <button id="mStreak" onclick="setMetric('streak')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🔥 Streak</button>
-      </div>
-      <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Ambito</p>
-      <div class="grid grid-cols-3 gap-2">
-        <button id="gGlobal" onclick="setScope('global')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🌍</button>
-        <button id="gCountry" onclick="setScope('country')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🇮🇹</button>
-        <button id="gRoom" onclick="setScope('room')" class="seg touch press glass rounded-2xl text-xs font-extrabold">🔒</button>
-      </div>
-      <div id="periodBlock">
-        <p class="text-[11px] uppercase tracking-widest text-slate-400 mt-3 mb-1.5">Periodo</p>
-        <div class="grid grid-cols-3 gap-2">
-          <button id="gToday" onclick="setPeriod('today')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Oggi</button>
-          <button id="gWeek" onclick="setPeriod('week')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Settimana</button>
-          <button id="gAll" onclick="setPeriod('all')" class="seg touch press glass rounded-2xl text-xs font-extrabold">Sempre</button>
-        </div>
-      </div>
-      <div id="roomPanel" class="hidden mt-3"></div>
-      <div id="rankList" class="mt-3 space-y-2"></div>
-    </div>
+  <div id="sub-hist" class="subtab">
+    <h1>Il tuo <span class="glow-pink">percorso.</span></h1>
+    <div id="histList"></div>
+    <h2>💾 Backup dati</h2>
+    <div class="card"><p class="mu" style="font-size:13px;margin-bottom:10px">I dati vivono nel cloud HOME-GYM. Esporta un backup prima di grandi pulizie.</p>
+      <div class="backup"><button onclick="exportJSON()">📥 Esporta JSON</button><button onclick="document.getElementById('imp').click()">📤 Importa JSON</button></div>
+      <input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importJSON(this)" />
+      <button class="dng" style="width:100%;margin-top:8px" onclick="wipeType()">Cancella serie di Trazioni</button></div>
   </div>
-
-  <div id="sub-hist" class="subtab space-y-3">
-    <div class="glass rounded-3xl p-4">
-      <h2 class="font-bold">📜 Storico · Trazioni</h2>
-      <div id="histList" class="mt-2 space-y-2"></div>
-    </div>
-  </div>
-</main>
-
-<nav class="fixed bottom-0 inset-x-0 z-20 px-3" style="padding-bottom:calc(.6rem + env(safe-area-inset-bottom))">
-  <div class="max-w-sm mx-auto glass flex justify-around py-2" style="border-radius:28px">
-    <button onclick="subtab('add')" data-sub="add" class="tab-btn active flex flex-col items-center px-4"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">➕</span><span class="text-[10px] font-bold">Inserisci</span></button>
-    <button onclick="subtab('stats')" data-sub="stats" class="tab-btn flex flex-col items-center px-4"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">📊</span><span class="text-[10px] font-bold">Stats</span></button>
-    <button onclick="subtab('rank')" data-sub="rank" class="tab-btn flex flex-col items-center px-4"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">🏆</span><span class="text-[10px] font-bold">Rank</span></button>
-    <button onclick="subtab('hist')" data-sub="hist" class="tab-btn flex flex-col items-center px-4"><span class="tab-icon touch flex items-center justify-center w-14 h-11 rounded-2xl bg-white/5 text-xl">📜</span><span class="text-[10px] font-bold">Storico</span></button>
-  </div>
-</nav>
-<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-28 z-30 px-5 py-3 rounded-2xl font-bold text-sm opacity-0 pointer-events-none glass whitespace-nowrap">✅</div>
+</div>
+<nav class="tabbar"><div>
+  <button data-sub="add" class="on" onclick="subtab('add')"><span>➕</span>Inserisci</button>
+  <button data-sub="stats" onclick="subtab('stats')"><span>📊</span>Stats</button>
+  <button data-sub="rank" onclick="subtab('rank')"><span>🏆</span>Rank</button>
+  <button data-sub="hist" onclick="subtab('hist')"><span>📜</span>Storico</button>
+</div></nav>
+<div id="toast"></div>
+<div id="sheetRoot"></div>
+<canvas id="confetti"></canvas>
 <script src="app.js"></script>
 </body>
 </html>
-
-
-
