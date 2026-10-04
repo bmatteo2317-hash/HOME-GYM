@@ -234,6 +234,18 @@ nav.tabbar button span,nav.tabbar a span{display:block;font-size:23px;line-heigh
 nav.tabbar .on{color:var(--lime);background:rgba(163,230,53,.09);box-shadow:inset 0 0 0 1px rgba(163,230,53,.3),0 0 18px rgba(163,230,53,.15)}
 .empty{text-align:center;color:var(--mu);padding:30px 10px}
 .hidden{display:none!important}
+/* ---------- Anti-overflow mobile ---------- */
+html,body{overflow-x:clip}
+#app{overflow-x:clip}
+.grid3 > *, .grid2 > *, .mini-grid > *, .seg > *, .seg3 > *, .quick > *{min-width:0}
+.row > *{min-width:0}
+.kpi{overflow:hidden}
+.kpi b{overflow-wrap:anywhere;font-size:clamp(17px,5.5vw,25px)}
+.kpi small{display:block}
+#prGrid{display:grid;grid-template-columns:1fr;gap:10px}
+#trendBadge{flex-wrap:wrap;gap:8px}
+.chart{max-width:100%}
+.chips > *{min-width:0}
 .warn{border-color:rgba(249,115,22,.4)}
 .exgrid{display:grid;grid-template-columns:1fr;gap:10px}
 .excard{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
