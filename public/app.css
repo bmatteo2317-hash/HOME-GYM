@@ -246,6 +246,59 @@ html,body{overflow-x:clip}
 #trendBadge{flex-wrap:wrap;gap:8px}
 .chart{max-width:100%}
 .chips > *{min-width:0}
+/* ---------- Polish eleganza + comodità ---------- */
+:root{--r:20px}
+#app{padding-bottom:calc(var(--nav-h) + var(--sab) + 120px)}
+h1{margin:8px 0 4px}
+h1 + .sub{margin-top:0}
+h2{margin:26px 0 12px}
+.card{border-radius:var(--r);padding:18px}
+.row.sp{flex-wrap:wrap}
+.chipbtn{min-height:48px;font-size:13.5px;border-radius:14px;padding:10px 8px}
+.chipbtn.on{font-weight:800}
+.kpi{padding:14px 8px;border-radius:16px}
+.kpi b{font-size:clamp(18px,6vw,26px)}
+.kpi small{font-size:12.5px}
+.hero{padding:26px 16px 22px}
+.hero b{letter-spacing:-1px}
+.datebar button{width:58px;min-height:54px;border-radius:14px}
+.datebar .dmid{border-radius:14px;padding:8px}
+.datebar .dmid b{font-size:15px}
+.step{min-height:58px;border-radius:14px}
+.step-row{gap:10px}
+.step-row input{width:104px;min-height:58px;border-radius:14px}
+.mini-grid{gap:10px}
+.mini-grid button{min-height:50px;border-radius:14px}
+.vargrid{gap:10px}
+.vargrid .var-btn{padding:12px 8px;border-radius:14px}
+.qadd{min-height:56px;border-radius:14px;font-size:15.5px}
+.pri{min-height:60px;border-radius:16px}
+.histbtn{min-height:50px;border-radius:14px}
+.lb-row{padding:12px 2px}
+.goal{padding:14px 0}
+.gicon{width:52px;height:52px}
+.tbtns button{min-height:50px;border-radius:14px}
+.tctrl .chipbtn{min-height:46px}
+.backup button{min-height:52px;border-radius:14px;font-weight:700}
+input,select{border-radius:14px}
+#chartSvg,#weekSvg,#statsChart{margin-top:8px}
+.chart text{font-size:10px;font-weight:600}
+.chart .grid{stroke:rgba(255,255,255,.08);stroke-width:1}
+.chart .base{stroke:rgba(255,255,255,.18);stroke-width:1}
+.chart-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.chart-head .chips{flex:1 1 220px;margin:0}
+.gdots{gap:11px}
+.gdot{font-size:14px}
+.excard{padding:18px}
+.excard .ebody b{font-size:19px;letter-spacing:-.3px}
+.topbar .logo{font-size:18px}
+#toast{font-size:14.5px;padding:13px 22px}
+nav.tabbar button,nav.tabbar a{font-size:11.5px}
+@media (max-width:360px){
+  .card{padding:15px 14px}
+  .grid3{gap:8px}
+  .kpi{padding:12px 4px}
+}
 .warn{border-color:rgba(249,115,22,.4)}
 .exgrid{display:grid;grid-template-columns:1fr;gap:10px}
 .excard{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}

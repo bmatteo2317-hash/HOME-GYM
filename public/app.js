@@ -183,6 +183,7 @@ function renderStatsPage() {
       <span class="ebody"><b>Vai al Profilo</b>
       <span class="esub" style="display:block">Username · Stato · obiettivo giornaliero</span></span>
       <span class="go">›</span></a>`;
+    const sc0 = $('statsChartCard'); if (sc0) sc0.style.display = 'none';
     return;
   }
   const mine = data.filter((w) => w.username === me);
@@ -221,6 +222,40 @@ function renderStatsPage() {
         <div class="gbar"><i style="width:${Math.round(tv / maxV * 100)}%"></i></div>
       </a>`;
     }).join('') + `</div>`;
+  renderStatsChart(mine);
+}
+/* Andamento globale: ultimi 14 giorni impilati per esercizio */
+const TYPE_KEYS = Object.keys(TYPES);
+function stackedSVG(items) {
+  const cols = TYPE_KEYS.map((t) => TYPES[t].accent);
+  const W = 340, H = 130, max = Math.max(1, ...items.map((i) => i.p.reduce((s, v) => s + v, 0))), bw = W / items.length;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H + 16}" role="img">`;
+  [0.33, 0.66, 1].forEach((f) => { const gy = (H - H * f).toFixed(1); s += `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" class="grid"/>`; });
+  items.forEach((it, x) => {
+    let y = H;
+    it.p.forEach((v, k) => {
+      if (v <= 0) return;
+      const hh = v / max * H; y -= hh;
+      s += `<rect x="${(x * bw + bw * .15).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw * .7).toFixed(1)}" height="${Math.max(2, hh).toFixed(1)}" rx="2" fill="${cols[k]}"/>`;
+    });
+    const tot = it.p.reduce((a, b) => a + b, 0);
+    if (tot > 0 && bw > 20) s += `<text x="${(x * bw + bw / 2).toFixed(1)}" y="${Math.max(10, y - 4).toFixed(1)}" text-anchor="middle">${tot.toLocaleString('it-IT')}</text>`;
+    s += `<text x="${(x * bw + bw / 2).toFixed(1)}" y="${H + 13}" text-anchor="middle">${esc(it.l)}</text>`;
+  });
+  return s + `<line x1="0" y1="${H}" x2="${W}" y2="${H}" class="base"/></svg><div class="legend">` + TYPE_KEYS.map((t) =>
+    `<span><span class="dot" style="background:${TYPES[t].accent};color:${TYPES[t].accent}"></span> ${esc(t)}</span>`).join('') + '</div>';
+}
+function renderStatsChart(mine) {
+  const card = $('statsChartCard'); if (!card) return;
+  card.style.display = '';
+  const box = $('statsChart'); if (!box) return;
+  const now = realToday(), items = [];
+  for (let i = 13; i >= 0; i--) {
+    const dt = new Date(now.getTime() - i * 864e5), k = isoOf(dt);
+    items.push({ l: String(dt.getDate()), p: TYPE_KEYS.map((t) => mine.filter((w) => w.date === k && ofType(w, t)).reduce((s, w) => s + w.amount, 0)) });
+  }
+  box.innerHTML = items.some((it) => it.p.some((v) => v > 0)) ? stackedSVG(items)
+    : '<p class="mu empty">Nessun dato negli ultimi 14 giorni — allenati e torna qui! 💪</p>';
 }
 
 /* ---------- PAGINA ESERCIZIO ---------- */
@@ -581,14 +616,15 @@ function renderStats() {
 }
 function barsSVG(items, color) {
   const W = 340, H = 130, max = Math.max(1, ...items.map((i) => i.v)), bw = W / items.length;
-  let s = `<svg class="chart" viewBox="0 0 ${W} ${H + 16}">`;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H + 16}" role="img">`;
+  [0.33, 0.66, 1].forEach((f) => { const y = (H - H * f).toFixed(1); s += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" class="grid"/>`; });
   items.forEach((it, x) => {
     const hh = it.v / max * H, y = H - hh;
-    if (it.v > 0) s += `<rect x="${x * bw + bw * .15}" y="${y}" width="${bw * .7}" height="${Math.max(3, hh)}" rx="3" fill="${color}"/>`;
-    if (it.v > 0 && bw > 20) s += `<text x="${x * bw + bw / 2}" y="${Math.max(9, y - 3)}" text-anchor="middle">${it.v}</text>`;
-    s += `<text x="${x * bw + bw / 2}" y="${H + 12}" text-anchor="middle">${esc(it.l)}</text>`;
+    if (it.v > 0) s += `<rect x="${(x * bw + bw * .15).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw * .7).toFixed(1)}" height="${Math.max(4, hh).toFixed(1)}" rx="4" fill="${color}"/>`;
+    if (it.v > 0 && bw > 20) s += `<text x="${(x * bw + bw / 2).toFixed(1)}" y="${Math.max(10, y - 4).toFixed(1)}" text-anchor="middle">${it.v.toLocaleString('it-IT')}</text>`;
+    s += `<text x="${(x * bw + bw / 2).toFixed(1)}" y="${H + 13}" text-anchor="middle">${esc(it.l)}</text>`;
   });
-  return s + '</svg>';
+  return s + `<line x1="0" y1="${H}" x2="${W}" y2="${H}" class="base"/></svg>`;
 }
 /* Andamento: 7 giorni / 30 giorni / 12 mesi */
 let chartRange = '7d';
@@ -621,7 +657,8 @@ function renderTrend() {
   const sub = $('chartSub');
   if (sub) sub.textContent = chartRange === '1y' ? 'Ultimi 12 mesi' : chartRange === '30d' ? 'Ultimi 30 giorni' : 'Ultimi 7 giorni';
   const box = $('chartSvg');
-  if (box) box.innerHTML = barsSVG(buckets, ACCENT);
+  if (box) box.innerHTML = buckets.some((b) => b.v > 0) ? barsSVG(buckets, ACCENT)
+    : '<p class="mu empty">Nessun dato in questo periodo — salva la prima serie 💪</p>';
   // settimanale: ultime 8 settimane + trend
   const wb = $('weekSvg');
   if (wb) {
@@ -636,7 +673,8 @@ function renderTrend() {
       }
       wk.push({ l: s.getDate() + '/' + (s.getMonth() + 1), v });
     }
-    wb.innerHTML = barsSVG(wk, '#a3e635');
+    wb.innerHTML = wk.some((w) => w.v > 0) ? barsSVG(wk, '#a3e635')
+      : '<p class="mu empty">Nessun dato nelle ultime 8 settimane 💪</p>';
     const rec = wk.slice(4).reduce((s, w) => s + w.v, 0) / 4, prev = wk.slice(0, 4).reduce((s, w) => s + w.v, 0) / 4;
     let b;
     if (prev === 0 && rec === 0) b = '<span class="badge b-eq">Dati insufficienti</span>';

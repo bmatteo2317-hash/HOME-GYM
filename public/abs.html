@@ -16,7 +16,7 @@
 <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <title>Addominali · HOME-GYM</title>
-<link rel="stylesheet" href="app.css?v=3" />
+<link rel="stylesheet" href="app.css?v=4" />
 <style>:root{--accent:#fb923c}</style>
 </head>
 <body data-page="exercise" data-type="Addominali">
@@ -48,7 +48,7 @@
     <h2>🏆 Record personali · Addominali</h2>
     <div class="grid3" id="prGrid"></div>
     <h2>📈 Andamento</h2>
-    <div class="card"><div class="row sp"><b>Grafico</b><div class="chips" style="margin:0"><button class="chipbtn" data-cr="7d" onclick="setChartRange('7d')">7G</button><button class="chipbtn" data-cr="30d" onclick="setChartRange('30d')">30G</button><button class="chipbtn" data-cr="1y" onclick="setChartRange('1y')">1A</button></div></div><p class="mu" id="chartSub" style="font-size:11px">Ultimi 7 giorni</p><div id="chartSvg"></div></div>
+    <div class="card"><div class="chart-head"><b>📈 Grafico</b><div class="chips"><button class="chipbtn" data-cr="7d" onclick="setChartRange('7d')">7G</button><button class="chipbtn" data-cr="30d" onclick="setChartRange('30d')">30G</button><button class="chipbtn" data-cr="1y" onclick="setChartRange('1y')">1A</button></div></div><p class="mu" id="chartSub" style="font-size:11px">Ultimi 7 giorni</p><div id="chartSvg"></div></div>
     <div class="card"><b>Andamento settimanale</b><div id="weekSvg" style="margin-top:8px"></div><div class="row sp" id="trendBadge" style="margin-top:10px"></div></div>
     <h2>🎯 Obiettivi · Addominali</h2>
     <div class="card" id="achList"></div>
@@ -84,6 +84,6 @@
 <div id="toast"></div>
 <div id="sheetRoot"></div>
 <canvas id="confetti"></canvas>
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>
