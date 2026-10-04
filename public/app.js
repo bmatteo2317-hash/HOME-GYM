@@ -502,3 +502,9 @@ document.addEventListener('input', (e) => {
     if (s) { const u = TYPES[TYPE].unit === 'seconds' ? 's' : ' reps'; s.textContent = `${TYPES[TYPE].icon} ${TYPE} · ${variant} → ${amount}${u} · ${selISO()}`; }
   }
 });
+/* ---------- PWA: registra service worker ---------- */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch((e) => console.warn('SW non registrato:', e));
+  });
+}
