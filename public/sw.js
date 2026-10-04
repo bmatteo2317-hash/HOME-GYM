@@ -1,10 +1,10 @@
 /* HOME-GYM service worker — offline + installabile */
-const CACHE = 'home-gym-v1';
+const CACHE = 'home-gym-v2';
 const CORE = [
   '/index.html',
   '/',
-  '/app.css',
-  '/app.js',
+  '/app.css?v=2',
+  '/app.js?v=2',
   '/manifest.webmanifest',
   '/icon-192.png',
   '/icon-512.png',
