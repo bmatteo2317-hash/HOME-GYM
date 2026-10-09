@@ -45,12 +45,19 @@
   <div id="sub-stats" class="subtab">
     <h1>Numeri <span class="glow-pink">veri.</span></h1>
     <div class="grid3" id="kpiRow"></div>
+    <h2>Medie · giorni allenati <span id="trainedDays">0</span></h2>
+    <div class="card" id="exerciseAverages"></div>
     <h2>🏆 Record personali · Trazioni</h2>
     <div class="grid3" id="prGrid"></div>
     <h2>📈 Andamento</h2>
-    <div class="card"><div class="chart-head"><b>📈 Grafico</b><div class="chips"><button class="chipbtn" data-cr="7d" onclick="setChartRange('7d')">7G</button><button class="chipbtn" data-cr="30d" onclick="setChartRange('30d')">30G</button><button class="chipbtn" data-cr="1y" onclick="setChartRange('1y')">1A</button></div></div><p class="mu" id="chartSub" style="font-size:11px">Ultimi 7 giorni</p><div id="chartSvg"></div></div>
+    <div class="card"><div class="chart-head"><b>📈 Grafico</b><div class="chips"><button class="chipbtn" data-cr="7d" onclick="setChartRange('7d')">7G</button><button class="chipbtn" data-cr="14d" onclick="setChartRange('14d')">14G</button><button class="chipbtn" data-cr="30d" onclick="setChartRange('30d')">30G</button><button class="chipbtn" data-cr="1y" onclick="setChartRange('1y')">1A</button></div></div><p class="mu" id="chartSub" style="font-size:11px">Ultimi 14 giorni</p><div id="chartSvg"></div></div>
     <div class="card"><b>Andamento settimanale</b><div id="weekSvg" style="margin-top:8px"></div><div class="row sp" id="trendBadge" style="margin-top:10px"></div></div>
-    <h2>🎯 Obiettivi · Trazioni</h2>
+  </div>
+
+  <div id="sub-goals" class="subtab">
+    <h1>I tuoi <span class="glow-pink">obiettivi.</span></h1>
+    <div class="card" id="goalPageCard"></div>
+    <h2>🏆 Traguardi · Trazioni</h2>
     <div class="card" id="achList"></div>
   </div>
 
@@ -78,12 +85,13 @@
 <nav class="tabbar"><div>
   <button data-sub="add" class="on" onclick="subtab('add')"><span>➕</span>Inserisci</button>
   <button data-sub="stats" onclick="subtab('stats')"><span>📊</span>Stats</button>
+  <button data-sub="goals" onclick="subtab('goals')"><span>🎯</span>Obiettivi</button>
   <button data-sub="rank" onclick="subtab('rank')"><span>🏆</span>Rank</button>
   <button data-sub="hist" onclick="subtab('hist')"><span>📜</span>Storico</button>
 </div></nav>
 <div id="toast"></div>
 <div id="sheetRoot"></div>
 <canvas id="confetti"></canvas>
-<script src="app.js?v=3"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>

@@ -1,9 +1,9 @@
 /* HOME-GYM · logica condivisa cloud (Neon) + UX modello cyber-fitness.
    Backend invariato: /api/workouts. Solo UI/UX portata dal modello PUSH-UP. */
 const TYPES = {
-  'Flessioni': { icon: '💪', unit: 'reps', file: 'pushups.html', desc: 'Push-ups', accent: '#38bdf8', glow: 'glow-cyan', variants: ['Larghe', 'Strette', 'Diamond', 'Classiche', 'Decline', 'Incline'] },
+  'Flessioni': { icon: '💪', unit: 'reps', file: 'pushups.html', desc: 'Push-ups', accent: '#38bdf8', glow: 'glow-cyan', variants: ['Classiche', 'Diamond', 'Larghe'], variantLabels: { Classiche: 'Normali' } },
   'Addominali': { icon: '🔥', unit: 'reps', file: 'abs.html', desc: 'Abs', variants: ['Bassi', 'Alti', 'Isometrici'] , accent: '#fb923c', glow: 'glow-fire'},
-  'Plank': { icon: '⏱️', unit: 'seconds', file: 'plank.html', desc: 'Core in secondi', accent: '#a3e635', glow: 'glow-lime', variants: ['Normale', 'Laterale', 'Dinamico'] },
+  'Plank': { icon: '⏱️', unit: 'seconds', file: 'plank.html', desc: 'Core in secondi', accent: '#a3e635', glow: 'glow-lime', variants: ['Normale', 'Laterale', 'Dinamico'], variantLabels: { Normale: 'Normale · braccia tese' } },
   'Trazioni': { icon: '🧗', unit: 'reps', file: 'pullups.html', desc: 'Pull-ups', accent: '#f472b6', glow: 'glow-pink', variants: ['Pronate', 'Supine', 'Neutre', 'Wide Grip'] },
 };
 const COUNTRIES = ['Italia', 'Francia', 'Germania', 'Spagna', 'Portogallo', 'Regno Unito', 'USA', 'Canada', 'Brasile', 'Argentina', 'Australia', 'Giappone', 'Altro'];
@@ -15,7 +15,8 @@ let rank = { scope: 'global', period: 'week', metric: 'volume', room: '', roomNa
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-const isoOf = (d) => d.toISOString().slice(0, 10);
+const variantLabel = (type, name) => TYPES[type].variantLabels?.[name] || name;
+const isoOf = (d) => [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-');
 const realToday = () => { const n = new Date(); n.setHours(0, 0, 0, 0); return n; };
 const selISO = () => { const d = realToday(); d.setDate(d.getDate() + dayOffset); return isoOf(d); };
 const flag = (c) => ({ Italia: '🇮🇹', Francia: '🇫🇷', Germania: '🇩🇪', Spagna: '🇪🇸', Portogallo: '🇵🇹', 'Regno Unito': '🇬🇧', USA: '🇺🇸', Canada: '🇨🇦', Brasile: '🇧🇷', Argentina: '🇦🇷', Australia: '🇦🇺', Giappone: '🇯🇵' }[c] || '🏳️');
@@ -183,25 +184,38 @@ function renderStatsPage() {
       <span class="ebody"><b>Vai al Profilo</b>
       <span class="esub" style="display:block">Username · Stato · obiettivo giornaliero</span></span>
       <span class="go">›</span></a>`;
-    const sc0 = $('statsChartCard'); if (sc0) sc0.style.display = 'none';
     return;
   }
   const mine = data.filter((w) => w.username === me);
   const days = new Set(mine.map((w) => w.date)).size;
   const vol = mine.reduce((s, w) => s + w.amount, 0);
-  const pr = mine.length ? Math.max(...mine.map((w) => w.amount)) : 0;
-  const avg = mine.length ? (vol / mine.length).toFixed(1) : 0;
-  const cards = [
-    ['🔥', String(calcStreak(me)), 'giorni streak'],
-    ['📦', vol.toLocaleString('it-IT'), 'volume totale'],
-    ['🏆', String(pr), 'PR massimo'],
-    ['📅', String(days), 'giorni attivi'],
-    ['📝', String(mine.length), 'serie totali'],
-    ['📊', String(avg), 'media per serie'],
-  ];
-  $('statsBody').innerHTML = `<div class="grid3">` + cards.map(([icon, v, l]) =>
-    `<div class="kpi"><b>${icon === '🔥' || icon === '📦' ? esc(v) : esc(v)}</b><small>${icon} ${l}</small></div>`).join('') + `</div>
-    <div style="margin-top:12px;display:grid;gap:10px">` + Object.entries(TYPES).map(([t, i]) => {
+  const today = isoOf(realToday());
+  const weekStart = isoOf(monday(realToday()));
+  const monthStart = isoOf(new Date(realToday().getFullYear(), realToday().getMonth(), 1));
+  const totalInRange = (start, end = today) => mine
+    .filter((w) => w.date >= start && w.date <= end)
+    .reduce((s, w) => s + w.amount, 0);
+  const avgByExercise = Object.entries(TYPES).map(([t, i]) => {
+    const exerciseTotal = mine.filter((w) => ofType(w, t)).reduce((s, w) => s + w.amount, 0);
+    const unit = i.unit === 'seconds' ? 's' : '';
+    return `<div class="row sp" style="margin-top:6px"><span><span class="dot" style="background:${i.accent};color:${i.accent}"></span> ${esc(t)}</span>
+      <span><b>${(days ? exerciseTotal / days : 0).toFixed(1)}${unit}</b> <span class="mu">/giorno · tot ${exerciseTotal.toLocaleString('it-IT')}${unit}</span></span></div>`;
+  }).join('');
+  $('statsBody').innerHTML = `<div class="grid3">
+      <div class="kpi"><b>${totalInRange(today)}</b><small>Oggi</small></div>
+      <div class="kpi"><b>${totalInRange(weekStart)}</b><small>Settimana</small></div>
+      <div class="kpi"><b>${totalInRange(monthStart)}</b><small>Mese</small></div>
+    </div>
+    <h2>Medie sui giorni allenati: ${days}</h2>
+    <div class="card"><div class="row sp"><span>Volume totale</span><b>${vol.toLocaleString('it-IT')}</b></div>
+      <div class="row sp" style="margin-top:6px"><span>Media giornaliera</span><b>${(days ? vol / days : 0).toFixed(1)}</b></div>
+      ${avgByExercise}</div>
+    <h2>Ultimi 14 giorni</h2>
+    <div class="card"><div id="statsChart"></div></div>
+    <h2>Andamento settimanale</h2>
+    <div class="card"><div id="statsWeekChart"></div><div class="row sp" id="statsTrendBadge" style="margin-top:12px"></div></div>
+    <h2>Dettaglio esercizi</h2>
+    <div style="display:grid;gap:10px">` + Object.entries(TYPES).map(([t, i]) => {
       const rows = mine.filter((w) => ofType(w, t));
       const tv = rows.reduce((s, w) => s + w.amount, 0);
       const tp = rows.length ? Math.max(...rows.map((w) => w.amount)) : 0;
@@ -246,8 +260,6 @@ function stackedSVG(items) {
     `<span><span class="dot" style="background:${TYPES[t].accent};color:${TYPES[t].accent}"></span> ${esc(t)}</span>`).join('') + '</div>';
 }
 function renderStatsChart(mine) {
-  const card = $('statsChartCard'); if (!card) return;
-  card.style.display = '';
   const box = $('statsChart'); if (!box) return;
   const now = realToday(), items = [];
   for (let i = 13; i >= 0; i--) {
@@ -256,30 +268,200 @@ function renderStatsChart(mine) {
   }
   box.innerHTML = items.some((it) => it.p.some((v) => v > 0)) ? stackedSVG(items)
     : '<p class="mu empty">Nessun dato negli ultimi 14 giorni — allenati e torna qui! 💪</p>';
+  const currentMonday = monday(now);
+  const weeks = [];
+  for (let i = 7; i >= 0; i--) {
+    const start = new Date(currentMonday);
+    start.setDate(start.getDate() - i * 7);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    weeks.push({
+      l: start.getDate() + '/' + (start.getMonth() + 1),
+      p: TYPE_KEYS.map((t) => mine.filter((w) => {
+        const date = new Date(w.date + 'T00:00:00');
+        return ofType(w, t) && date >= start && date < end;
+      }).reduce((s, w) => s + w.amount, 0)),
+    });
+  }
+  const weekBox = $('statsWeekChart');
+  if (weekBox) weekBox.innerHTML = weeks.some((week) => week.p.some((value) => value > 0))
+    ? stackedSVG(weeks)
+    : '<p class="mu empty">Nessun dato nelle ultime 8 settimane 💪</p>';
+  const recentAverage = weeks.slice(4).reduce((sum, week) => sum + week.p.reduce((a, b) => a + b, 0), 0) / 4;
+  const previousAverage = weeks.slice(0, 4).reduce((sum, week) => sum + week.p.reduce((a, b) => a + b, 0), 0) / 4;
+  let trend;
+  if (recentAverage === 0 && previousAverage === 0) trend = '<span class="badge b-eq">Dati insufficienti</span>';
+  else if (previousAverage === 0) trend = '<span class="badge b-up">▲ In crescita</span>';
+  else {
+    const change = (recentAverage - previousAverage) / previousAverage * 100;
+    trend = Math.abs(change) < 3
+      ? `<span class="badge b-eq">● Stabile (${change.toFixed(0)}%)</span>`
+      : change > 0 ? `<span class="badge b-up">▲ +${change.toFixed(0)}%</span>`
+        : `<span class="badge b-dn">▼ ${change.toFixed(0)}%</span>`;
+  }
+  const badge = $('statsTrendBadge');
+  if (badge) badge.innerHTML = `<span class="mu">Ultime 4 sett. vs 4 precedenti</span>${trend}`;
 }
 
 /* ---------- PAGINA ESERCIZIO ---------- */
 function pickVar(v) { variant = v; amount = TYPES[TYPE].unit === 'seconds' ? 30 : 12; renderEntry(); }
 function step(d) { amount = Math.max(1, (parseInt($('inAmount').value || '0', 10) || 0) + d); $('inAmount').value = amount; updSelInfo(); }
+let entryDraft = {};
+let draftDate = null;
+function rowsForDay(date) {
+  return mineRows(TYPE).filter((w) => w.date === date);
+}
+function loadDayDraft(date) {
+  entryDraft = Object.fromEntries(TYPES[TYPE].variants.map((v) => [v, []]));
+  rowsForDay(date).forEach((w) => {
+    const v = w.variant || ((w.exercise || '').includes('·') ? w.exercise.split('·')[1].trim() : '');
+    if (!entryDraft[v]) entryDraft[v] = [];
+    entryDraft[v].push({ id: w.id, amount: w.amount });
+  });
+  draftDate = date;
+}
+function changeEntryDate(value) {
+  if (!value) return;
+  const selected = new Date(value + 'T00:00:00');
+  const today = realToday();
+  if (!Number.isFinite(selected.getTime()) || isoOf(selected) !== value || value > isoOf(today)) return;
+  const d = realToday();
+  d.setDate(d.getDate() + dayOffset);
+  dayOffset += Math.round((selected.getTime() - d.getTime()) / 864e5);
+  paintDay();
+  renderEntry();
+  renderHero();
+  renderGoalCard();
+}
+function shiftEntryDate(delta) {
+  if (delta > 0 && dayOffset >= 0) return;
+  dayOffset = Math.min(0, dayOffset + delta);
+  paintDay();
+  renderEntry();
+  renderHero();
+  renderGoalCard();
+}
+function addDraftSet(v) {
+  entryDraft[v].push({ id: null, amount: 0 });
+  renderEntry();
+  const inputs = [...document.querySelectorAll('[data-draft-variant]')].filter((input) => input.dataset.draftVariant === v);
+  if (inputs.length) inputs[inputs.length - 1].focus();
+}
+function setDraftValue(v, index, value) {
+  const parsed = value === '' ? 0 : Number(value);
+  entryDraft[v][index].amount = Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : 0;
+  const total = $('draftDayTotal');
+  const dayTotal = Object.values(entryDraft).flat().reduce((sum, row) => sum + row.amount, 0);
+  if (total) total.textContent = dayTotal;
+  const heroTotal = $('draftHeroTotal');
+  if (heroTotal) heroTotal.textContent = dayTotal + (TYPES[TYPE].unit === 'seconds' ? 's' : '');
+  const variantTotal = $('draft-total-' + TYPES[TYPE].variants.indexOf(v));
+  if (variantTotal) variantTotal.textContent = entryDraft[v].reduce((sum, row) => sum + row.amount, 0);
+}
+function deleteDraftSet(v, index) {
+  entryDraft[v].splice(index, 1);
+  renderEntry();
+}
 function updSelInfo() {
   const s = $('selInfo'); if (!s || !TYPE) return;
   const u = TYPES[TYPE].unit === 'seconds' ? 's' : ' reps';
   s.textContent = `${TYPES[TYPE].icon} ${TYPE} · ${variant} → ${amount}${u} · ${selISO()}`;
 }
-function renderVariants() {
-  if (!TYPE) return;
-  const info = TYPES[TYPE];
-  const vg = $('varGrid');
-  if (vg) vg.innerHTML = info.variants.map((v) =>
-    `<button onclick="pickVar('${esc(v)}')" class="var-btn touch press glass ${v === variant ? 'active' : ''}" style="border-radius:14px">${esc(v)}</button>`).join('');
-  const uh = $('unitHint');
-  if (uh) uh.textContent = info.unit === 'seconds' ? '⏱️ Inserisci SECONDI' : '🔁 Inserisci ripetizioni';
-}
 function renderEntry() {
   if (!TYPE) return;
-  renderVariants();
-  const inp = $('inAmount'); if (inp) inp.value = amount;
-  updSelInfo();
+  const info = TYPES[TYPE];
+  const workspace = $('entryWorkspace');
+  if (!workspace) return;
+  const date = selISO();
+  if (draftDate !== date) loadDayDraft(date);
+  const unit = info.unit === 'seconds' ? 'secondi' : 'ripetizioni';
+  const unitShort = info.unit === 'seconds' ? 's' : '';
+  const total = Object.values(entryDraft).flat().reduce((sum, row) => sum + row.amount, 0);
+  workspace.innerHTML = `
+    <div class="datebar">
+      <button onclick="shiftEntryDate(-1)" aria-label="Giorno precedente">‹</button>
+      <input type="date" value="${date}" max="${isoOf(realToday())}" aria-label="Giorno allenamento" onchange="changeEntryDate(this.value)">
+      <button onclick="shiftEntryDate(1)" aria-label="Giorno successivo" ${dayOffset === 0 ? 'disabled' : ''}>›</button>
+    </div>
+    <div class="card hero"><span class="lbl">${esc(TYPE)} · ${esc(info.desc)}</span><b id="draftHeroTotal">${total}${unitShort}</b><div class="meta">${date === isoOf(realToday()) ? 'Allenamento di oggi' : 'Allenamento del giorno selezionato'}</div></div>
+    <div class="card"><div class="row sp"><span class="mu">Totale giornata</span><b><span id="draftDayTotal">${total}</span> ${unitShort}</b></div>
+      <p class="mu" style="font-size:12px;margin-top:4px">Registra le serie per ogni variante, poi salva la giornata.</p>
+    </div>
+    ${info.variants.map((v, variantIndex) => {
+      const sets = entryDraft[v];
+      const variantTotal = sets.reduce((sum, row) => sum + row.amount, 0);
+      return `<div class="card">
+        <div class="cat-head"><div class="cat-name"><span class="dot" style="background:${info.accent};color:${info.accent}"></span>${esc(variantLabel(TYPE, v))}</div>
+        <span class="tot" id="draft-total-${variantIndex}" style="color:${info.accent}">${variantTotal}${unitShort}</span></div>
+        ${sets.map((row, index) => `<div class="row ser" style="margin-top:8px">
+          <label style="color:var(--mu);width:56px;flex:none;font-size:14px">Serie ${index + 1}</label>
+          <input type="number" inputmode="numeric" min="0" max="100000" style="flex:1;min-height:52px;font-size:18px;font-weight:700" data-draft-variant="${esc(v)}" value="${row.amount || ''}" placeholder="${unitShort ? 'Secondi' : 'Ripetizioni'}" aria-label="${esc(variantLabel(TYPE, v))}: serie ${index + 1}" oninput="setDraftValue('${esc(v)}',${index},this.value)">
+          <button class="dng" onclick="deleteDraftSet('${esc(v)}',${index})" aria-label="Elimina serie ${index + 1} di ${esc(variantLabel(TYPE, v))}">✕</button>
+        </div>`).join('')}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+          <button class="add" style="width:100%;margin:0;border-style:dashed" onclick="addDraftSet('${esc(v)}')">＋ Manuale</button>
+          <button class="qadd glass" style="width:100%;min-height:48px;margin:0" aria-label="Inserimento rapido ${esc(variantLabel(TYPE, v))}" onclick="openSheet('${esc(v)}')">⚡ Rapida</button>
+        </div>
+      </div>`;
+    }).join('')}
+    <div class="savebar"><button class="pri" id="saveDayButton" onclick="saveDay()">💾 Salva giornata</button></div>`;
+  const dateInput = workspace.querySelector('input[type="date"]');
+  if (dateInput) dateInput.style.cssText = 'flex:1;text-align:center;color-scheme:dark;min-height:50px';
+}
+async function saveDay() {
+  if (!profile.username) {
+    toast('👤 Prima imposta username nel Profilo');
+    setTimeout(() => (location.href = 'profile.html'), 600);
+    return;
+  }
+  const date = selISO();
+  const info = TYPES[TYPE];
+  const entries = Object.entries(entryDraft).flatMap(([v, sets]) => sets
+    .filter((row) => Number.isSafeInteger(row.amount) && row.amount > 0)
+    .map((row) => ({ variant: v, amount: row.amount })));
+  if (entries.some((row) => row.amount > 100000)) return toast('❌ Il valore massimo per serie è 100.000');
+  const button = $('saveDayButton');
+  if (button) button.disabled = true;
+  const previous = snapshot();
+  const ownDay = (w) => w.date === date && profile.username === w.username && ofType(w, TYPE);
+  let saved;
+  try {
+    const result = await api('/api/workouts?type=day', {
+      method: 'POST',
+      body: JSON.stringify({ category: TYPE, date, username: profile.username, country: profile.country, entries }),
+    });
+    saved = result.workouts || [];
+  } catch (e) {
+    console.error('Salvataggio giornata non riuscito:', e);
+    saved = entries.map((entry, index) => ({
+      id: -Date.now() - index,
+      category: TYPE,
+      variant: entry.variant,
+      exercise: TYPE + ' · ' + entry.variant,
+      amount: entry.amount,
+      unit: info.unit,
+      date,
+      username: profile.username,
+      country: profile.country,
+    }));
+    toast('📴 Giornata salvata solo in locale: ' + e.message);
+  }
+  data = data.filter((w) => !ownDay(w)).concat(saved);
+  entryDraft = Object.fromEntries(info.variants.map((v) => [v, []]));
+  saved.forEach((w) => {
+    if (!entryDraft[w.variant]) entryDraft[w.variant] = [];
+    if (entryDraft[w.variant]) entryDraft[w.variant].push({ id: w.id, amount: w.amount });
+  });
+  draftDate = date;
+  try { localStorage.setItem('hg_w', JSON.stringify(data)); }
+  catch (e) { console.warn('Impossibile aggiornare la cache locale degli allenamenti:', e); }
+  renderEntry();
+  renderHero();
+  renderStats();
+  renderHistory();
+  paintTopbar();
+  if (!saved.some((w) => w.id < 0)) newsToast(detectNews(previous), 'Giornata salvata ✓');
+  if (button) button.disabled = false;
 }
 function renderHero() {
   if (!TYPE) return;
@@ -294,7 +476,7 @@ function renderHero() {
     hm.innerHTML = `<b>${nSet}</b> serie · volume totale <b>${tot.toLocaleString('it-IT')}${u}</b>`;
   }
 }
-/* Invio unificato (form + sheet rapida) — backend cloud invariato */
+/* Inserimento manuale singolo — le serie rapide confluiscono nella bozza giornaliera */
 async function postEntry(val, varOverride) {
   if (!profile.username) { toast('👤 Prima imposta username nel Profilo'); setTimeout(() => (location.href = 'profile.html'), 600); return false; }
   const info = TYPES[TYPE];
@@ -355,8 +537,9 @@ function goalDots() {
 }
 function toggleGoalEdit() { goalEdit = !goalEdit; renderGoalCard(); }
 function setGoalMode(m) { GS.mode = m; saveGS(); goalEdit = m === 'manual'; renderGoalCard(); maybeCelebrate(); }
-function saveGoalManual() {
-  const v = parseInt(($('g-man') || {}).value) || 0;
+function saveGoalManual(prefix) {
+  const input = $('g-man-' + prefix);
+  const v = parseInt((input || {}).value) || 0;
   if (v < 1) { toast('Inserisci un numero ≥ 1'); return; }
   GS.manual = v; GS.mode = 'manual'; saveGS(); goalEdit = false; renderGoalCard(); maybeCelebrate();
   toast('Obiettivo: ' + v + ' 🏁');
@@ -364,15 +547,14 @@ function saveGoalManual() {
 function renderGoalCard() {
   if (!TYPE) return;
   GS = goalSettings();
-  const box = $('goalCard'); if (!box) return;
   const g = currentGoal();
   const appDay = mineRows(TYPE).filter((w) => w.date === selISO()).reduce((s, w) => s + w.amount, 0);
   const pct = Math.min(100, Math.round(appDay / g * 100)), done = appDay >= g;
-  box.innerHTML = `<div class="row sp"><div>
+  const markup = (prefix) => `<div class="row sp"><div>
       <span class="mu" style="font-size:13px">🎯 Obiettivo di oggi · ${esc(TYPE)}</span>
-      <div id="g-txt" style="font-size:17px;font-weight:800"><b>${appDay}</b> / ${g}</div></div>
+      <div id="g-txt-${prefix}" style="font-size:17px;font-weight:800"><b>${appDay}</b> / ${g}</div></div>
       <button onclick="toggleGoalEdit()" aria-label="Modifica obiettivo" style="min-height:42px">✏️</button></div>
-    <div class="gbar"><i id="g-fill" style="width:${pct}%"></i></div>
+    <div class="gbar"><i id="g-fill-${prefix}" style="width:${pct}%"></i></div>
     <div class="row sp" style="margin-top:8px">
       <span class="mu" style="font-size:12px">${GS.mode === 'manual' ? 'Obiettivo personalizzato' : 'Suggerito · mediana +10%'}</span>
       ${done ? '<span class="badge b-up">Completato! 🎉</span>' : `<span class="mu" style="font-size:12px">${pct}%</span>`}</div>
@@ -381,9 +563,13 @@ function renderGoalCard() {
         <button class="${GS.mode === 'auto' ? 'on' : ''}" onclick="setGoalMode('auto')">🤖 Auto (${autoGoal(isoOf(realToday()))})</button>
         <button class="${GS.mode === 'manual' ? 'on' : ''}" onclick="setGoalMode('manual')">✏️ Manuale</button></div>
       ${GS.mode === 'manual' ? `<div class="row" style="margin-top:8px">
-        <input id="g-man" type="number" inputmode="numeric" min="1" max="100000" value="${GS.manual}"
+        <input id="g-man-${prefix}" type="number" inputmode="numeric" min="1" max="100000" value="${GS.manual}"
           style="flex:1;min-height:48px;text-align:center;font-weight:800;font-size:18px" aria-label="Obiettivo manuale">
-        <button class="tgo" style="min-height:48px;padding:0 18px;border:0;border-radius:12px;font-weight:900" onclick="saveGoalManual()">OK</button></div>` : ''}</div>` : ''}`;
+        <button class="tgo" style="min-height:48px;padding:0 18px;border:0;border-radius:12px;font-weight:900" onclick="saveGoalManual('${prefix}')">OK</button></div>` : ''}</div>` : ''}`;
+  const entryBox = $('goalCard');
+  if (entryBox) entryBox.innerHTML = markup('entry');
+  const pageBox = $('goalPageCard');
+  if (pageBox) pageBox.innerHTML = markup('page');
   const sl = $('streakLine');
   if (sl) sl.textContent = `🔥 Streak ${TYPE}: ${calcStreak(profile.username || null, TYPE)} giorni · globale: ${calcStreak(profile.username || null)} giorni`;
 }
@@ -475,11 +661,13 @@ function renderTimer() {
 }
 
 /* ---------- Bottom sheet inserimento rapido ---------- */
-let sheet = { open: false, val: 0, touchY: null };
+let sheet = { open: false, val: 0, touchY: null, variant: null };
 function quickVals() { return (TYPES[TYPE] && TYPES[TYPE].unit === 'seconds') ? [10, 30, 60, 120, 300] : [5, 10, 20, 50, 100]; }
-function openSheet() {
+function openSheet(targetVariant) {
   if (!TYPE) return;
-  sheet = { open: true, val: TYPES[TYPE].unit === 'seconds' ? 30 : 12, touchY: null };
+  const selectedVariant = targetVariant || variant;
+  if (!TYPES[TYPE].variants.includes(selectedVariant)) return;
+  sheet = { open: true, val: 0, touchY: null, variant: selectedVariant };
   document.body.style.overflow = 'hidden'; renderSheet();
   requestAnimationFrame(() => requestAnimationFrame(() => { const w = $('sheetWrap'); if (w) w.classList.add('open'); }));
 }
@@ -503,12 +691,14 @@ function updSheet() {
   const c = $('sh-val'); if (c) c.textContent = sheet.val;
   const b = $('sh-ok'); if (b) b.disabled = sheet.val <= 0;
 }
-async function sheetConfirm() {
-  if (sheet.val <= 0) return;
-  const v = sheet.val;
+function sheetConfirm() {
+  if (!Number.isSafeInteger(sheet.val) || sheet.val <= 0 || sheet.val > 100000) return;
+  const selectedVariant = sheet.variant;
+  if (!selectedVariant || !entryDraft[selectedVariant]) return;
+  entryDraft[selectedVariant].push({ id: null, amount: sheet.val });
   closeSheet();
-  const ok = await postEntry(v, variant);
-  if (ok) tReset(true);
+  renderEntry();
+  toast('✅ Serie aggiunta alla giornata');
 }
 function shT(e) { sheet.touchY = e.touches[0].clientY; }
 function shE(e) {
@@ -521,11 +711,11 @@ function renderSheet() {
   if (!sheet.open) { root.innerHTML = ''; return; }
   const u = TYPES[TYPE].unit === 'seconds' ? 's' : '';
   root.innerHTML = `<div class="sheet-wrap" id="sheetWrap"><div class="backdrop" onclick="closeSheet()"></div>
-    <div class="sheet" role="dialog" aria-modal="true" aria-label="Aggiungi serie ${esc(variant || '')}"
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="Aggiungi serie ${esc(variantLabel(TYPE, sheet.variant || ''))}"
       ontouchstart="shT(event)" ontouchend="shE(event)">
       <div class="grab"></div>
       <button class="x" onclick="closeSheet()" aria-label="Annulla">✕</button>
-      <div class="sh-cat"><span class="dot" style="background:${ACCENT};color:${ACCENT}"></span>${esc(variant || '')}
+      <div class="sh-cat"><span class="dot" style="background:${ACCENT};color:${ACCENT}"></span>${esc(variantLabel(TYPE, sheet.variant || ''))}
         <span class="mu">${esc(TYPE)}</span></div>
       <div class="sh-counter" id="sh-val" style="color:${ACCENT};text-shadow:0 0 30px ${ACCENT}66">${sheet.val}</div>
       <div class="sh-hint">serie in composizione · ${selISO()}</div>
@@ -589,14 +779,31 @@ function renderStats() {
   const info = TYPES[TYPE];
   const u = info.unit === 'seconds' ? 's' : '';
   const rows = mineRows(TYPE);
-  const today = isoOf(realToday());
-  const todayV = rows.filter((w) => w.date === today).reduce((s, w) => s + w.amount, 0);
-  const weekV = rows.filter((w) => w.date >= isoOf(new Date(realToday().getTime() - 6 * 864e5))).reduce((s, w) => s + w.amount, 0);
+  const today = isoOf(realToday()), weekStart = isoOf(monday(realToday()));
+  const monthStart = isoOf(new Date(realToday().getFullYear(), realToday().getMonth(), 1));
+  const rangeTotal = (from) => rows.filter((w) => w.date >= from && w.date <= today).reduce((s, w) => s + w.amount, 0);
+  const trainedDays = new Set(rows.filter((w) => w.amount > 0).map((w) => w.date)).size;
   const tot = rows.reduce((s, w) => s + w.amount, 0);
+  const trainedDaysLabel = $('trainedDays');
+  if (trainedDaysLabel) trainedDaysLabel.textContent = trainedDays;
   const kr = $('kpiRow');
-  if (kr) kr.innerHTML = `<div class="kpi"><b>${todayV}${u}</b><small>Oggi</small></div>
-    <div class="kpi"><b>${weekV}${u}</b><small>Settimana</small></div>
-    <div class="kpi"><b>${tot.toLocaleString('it-IT')}${u}</b><small>Totale</small></div>`;
+  if (kr) kr.innerHTML = `<div class="kpi"><b>${rangeTotal(today)}${u}</b><small>Oggi</small></div>
+    <div class="kpi"><b>${rangeTotal(weekStart)}${u}</b><small>Settimana</small></div>
+    <div class="kpi"><b>${rangeTotal(monthStart).toLocaleString('it-IT')}${u}</b><small>Mese</small></div>`;
+  const avgBox = $('exerciseAverages');
+  if (avgBox) {
+    const sums = Object.fromEntries(info.variants.map((name) => [name, 0]));
+    rows.forEach((w) => {
+      const name = w.variant || ((w.exercise || '').includes('·') ? w.exercise.split('·')[1].trim() : '?');
+      sums[name] = (sums[name] || 0) + w.amount;
+    });
+    avgBox.innerHTML = `<div class="row sp"><span>Totale ${esc(TYPE)}</span><b>${tot.toLocaleString('it-IT')}${u}</b></div>
+      <div class="row sp" style="margin-top:6px"><span>Media giornaliera</span><b>${(trainedDays ? tot / trainedDays : 0).toFixed(1)}${u}</b></div>` +
+      info.variants.map((name) => `<div class="row sp" style="margin-top:6px">
+        <span><span class="dot" style="background:${info.accent};color:${info.accent}"></span> ${esc(variantLabel(TYPE, name))}</span>
+        <span><b>${(trainedDays ? (sums[name] || 0) / trainedDays : 0).toFixed(1)}${u}</b> <span class="mu">/giorno · tot ${(sums[name] || 0).toLocaleString('it-IT')}${u}</span></span>
+      </div>`).join('');
+  }
   const byV = Object.fromEntries(info.variants.map((x) => [x, { vol: 0, n: 0, pr: 0 }]));
   data.filter((w) => (!profile.username || w.username === profile.username) && ofType(w, TYPE)).forEach((w) => {
     const vv = w.variant || ((w.exercise || '').includes('·') ? w.exercise.split('·')[1].trim() : '?');
@@ -626,8 +833,8 @@ function barsSVG(items, color) {
   });
   return s + `<line x1="0" y1="${H}" x2="${W}" y2="${H}" class="base"/></svg>`;
 }
-/* Andamento: 7 giorni / 30 giorni / 12 mesi */
-let chartRange = '7d';
+/* Andamento: 7 / 14 / 30 giorni o 12 mesi */
+let chartRange = '14d';
 function setChartRange(r) { chartRange = r; paintChartSeg(); renderTrend(); }
 function paintChartSeg() {
   document.querySelectorAll('[data-cr]').forEach((b) => b.classList.toggle('on', b.dataset.cr === chartRange));
@@ -647,15 +854,16 @@ function renderTrend() {
       buckets.push({ label: dt.toLocaleDateString('it-IT', { month: 'short' }).replace('.', ''), v });
     }
   } else {
-    const n = chartRange === '30d' ? 30 : 7;
+    const n = chartRange === '30d' ? 30 : chartRange === '14d' ? 14 : 7;
     for (let i = n - 1; i >= 0; i--) {
       const dt = new Date(realToday().getTime() - i * 864e5), k = isoOf(dt);
       const v = mineRows(TYPE).filter((w) => w.date === k).reduce((s, w) => s + w.amount, 0);
-      buckets.push({ label: n === 30 ? ((n - 1 - i) % 5 === 0 ? String(dt.getDate()) : '') : dt.toLocaleDateString('it-IT', { weekday: 'narrow' }), v });
+      buckets.push({ label: n === 30 ? ((n - 1 - i) % 5 === 0 ? String(dt.getDate()) : '')
+        : n === 14 ? String(dt.getDate()) : dt.toLocaleDateString('it-IT', { weekday: 'narrow' }), v });
     }
   }
   const sub = $('chartSub');
-  if (sub) sub.textContent = chartRange === '1y' ? 'Ultimi 12 mesi' : chartRange === '30d' ? 'Ultimi 30 giorni' : 'Ultimi 7 giorni';
+  if (sub) sub.textContent = chartRange === '1y' ? 'Ultimi 12 mesi' : `Ultimi ${chartRange === '30d' ? 30 : chartRange === '14d' ? 14 : 7} giorni`;
   const box = $('chartSvg');
   if (box) box.innerHTML = buckets.some((b) => b.v > 0) ? barsSVG(buckets, ACCENT)
     : '<p class="mu empty">Nessun dato in questo periodo — salva la prima serie 💪</p>';
@@ -944,6 +1152,9 @@ async function saveProfile() {
 
 /* ---------- init ---------- */
 function renderExercisePage() {
+  const add = $('sub-add');
+  const title = add && add.querySelector('h1');
+  if (add) add.innerHTML = (title ? title.outerHTML : '') + '<div id="entryWorkspace"></div>';
   variant = TYPES[TYPE].variants[0];
   amount = TYPES[TYPE].unit === 'seconds' ? 30 : 12;
   GS = goalSettings();
@@ -957,6 +1168,7 @@ function subtab(n) {
   const el = $('sub-' + n); if (el) el.classList.add('active');
   document.querySelectorAll('[data-sub]').forEach((b) => b.classList.toggle('on', b.dataset.sub === n));
   if (n === 'rank') loadRank();
+  if (n === 'goals') { renderGoalCard(); renderAch(); }
   window.scrollTo({ top: 0 });
 }
 document.addEventListener('DOMContentLoaded', () => {

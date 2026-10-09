@@ -1,75 +1,83 @@
-# HOME-GYM · Calisthenics Tracker 💪
+# Push-Up Tracker — Vercel + Neon
 
-Web App iOS-style (Liquid/Glass, dark OLED) per tracciare allenamenti calistenici a casa.
-Stack: **HTML + Tailwind + Vanilla JS** · **Vercel Serverless (Node.js)** · **Neon PostgreSQL**.
+App statica (`index.html`) + Serverless API (`/api/workouts`) + Postgres su Neon.
+
+## 1. Crea il database Neon
+
+1. Vai su https://neon.tech → New Project (region vicina, es. EU West).
+2. Apri **SQL Editor** e incolla il contenuto di `schema.sql` → Run.
+3. Vai su **Connect** → copia la **pooled connection string**, es:
+   `postgresql://user:pass@ep-xxx-pooler.eu-west-1.aws.neon.tech/dbname?sslmode=require`
+
+## 2. Deploy su Vercel
+
+```bash
+npm i -g vercel
+vercel          # primo deploy (anteprima)
+```
+
+Poi imposta la variabile d'ambiente (oppure da Dashboard → Project → Settings → Environment Variables):
+
+```bash
+vercel env add DATABASE_URL production
+# incolla la connection string di Neon
+vercel --prod
+```
+
+Oppure da Dashboard Vercel:
+- **Settings → Environment Variables** → `DATABASE_URL` = connection string Neon (tutti gli env: Production, Preview, Development).
+- Oppure usa l'integrazione ufficiale: **Storage → Connect → Neon**.
+
+## 3. Test locale
+
+```bash
+npm install
+# crea .env da .env.example con la tua DATABASE_URL
+vercel dev
+# apri http://localhost:3000
+```
 
 ## Struttura
 
 ```
-HOME-GYM/
-├── package.json          # dipendenze (pg)
-├── vercel.json           # routing frontend + api
-├── schema.sql            # tabelle Neon (workouts + profile + rooms)
-├── .env.example          # esempio variabile DATABASE_URL
-├── api/
-│   └── workouts.js       # workouts + leaderboard + stanze + profilo + ?type=schema (diagnosi)
-└── public/
-    ├── index.html        # home + statistiche profilo + stanze
-    ├── stats.html        # statistiche generali dedicate
-    ├── rank.html         # classifiche globali (tutti gli esercizi)
-    ├── profile.html      # profilo e obiettivi
-    ├── pushups.html / abs.html / plank.html / pullups.html
-    ├── app.js            # logica condivisa
-    └── app.css           # stile iOS OLED condiviso
+index.html          → frontend (fetch /api/workouts, fallback localStorage offline)
+api/
+  db.js             → client @neondatabase/serverless + validazioni
+  workouts.js       → GET/POST/DELETE allenamenti
+schema.sql          → tabella workouts su Neon
+package.json        → dipendenza @neondatabase/serverless
+vercel.json         → runtime nodejs22.x per /api
+pushup-tracker.html → originale (solo localStorage, tenuto per riferimento)
 ```
 
 ## API
 
-| Metodo | Endpoint | Descrizione |
-|---|---|---|
-| GET | `/api/workouts` | lista serie (max 1000) |
-| POST | `/api/workouts` | `{category, variant, exercise, amount, unit: 'reps'\|'seconds', date:'YYYY-MM-DD', username, country}` |
-| DELETE | `/api/workouts?id=123` | elimina serie |
-| GET | `/api/workouts?type=leaderboard&scope=&period=&metric=volume\|pr\|streak&exercise=&room=` | classifica ordinata |
-| GET/POST | `/api/workouts?type=profile` | `{name, username, country, weekly_goal, avatar, level}` |
-| GET/POST | `/api/workouts?type=rooms` / `type=room_join` / `type=room&code=` | stanze private |
-| GET | `/api/workouts?type=schema` | diagnosi: colonne reali, conteggi, ultime 3 righe |
+- `GET /api/workouts` → `{ "2026-09-01": {wide:[20,15], close:[10], diamond:[]} }`
+- `POST /api/workouts` body `{date:"YYYY-MM-DD", entry:{wide:[],close:[],diamond:[]}}` → upsert (totale 0 = cancella)
+- `DELETE /api/workouts?date=YYYY-MM-DD` → cancella giornata
+- `GET /api/health` → diagnostica `{ ok, databaseUrlConfigured, tableExists, count, error }`
 
-Le tabelle si auto-creano e auto-migrano al primo avvio (`ensureSchema`, inclusa migrazione dalle vecchissime colonne `exercise_category/...`), ma è consigliato eseguire `schema.sql` una volta su Neon.
+Il frontend mostra **"Connesso a Neon ☁️"** oppure **"Offline — uso dati locali"** se `DATABASE_URL` manca o il DB non risponde.
 
-## Deploy passo-passo
+## I dati non si salvano su Neon? Checklist
 
-### 1. Database su Neon
-1. Vai su https://neon.tech → crea account → **New Project** (regione vicina, es. EU Central).
-2. Apri il progetto → **SQL Editor** → incolla il contenuto di `schema.sql` → **Run**.
-3. Vai su **Dashboard → Connection Details** → copia la **Connection string** (formato `postgresql://...?sslmode=require`).
+L'app ora mostra un **avviso arancione con la causa esatta** direttamente in Home. Le cause più comuni:
 
-### 2. Codice su GitHub
-```powershell
-cd "C:\Users\ASUS\Desktop\ProgettiVita\HOME-GYM"
-git init
-git add .
-git commit -m "feat: home-gym calisthenics tracker"
-gh repo create HOME-GYM --public --source=. --push
-```
-(Oppure crea il repo da github.com e fai `git remote add origin ...` + `git push -u origin main`.)
+1. **`DATABASE_URL non configurata`** → Vercel Dashboard → Project → Settings → Environment Variables → aggiungi `DATABASE_URL` (connection string *pooled* di Neon) per Production + Preview + Development → **redeploy** (senza redeploy la variabile non viene applicata).
+2. **Tabella mancante** (`relation "workouts" does not exist`) → Neon Dashboard → SQL Editor → incolla `schema.sql` → Run.
+3. **Stai aprendo `index.html` come file locale** (`file://...`) → le `/api` non esistono: apri l'URL Vercel oppure `vercel dev` in locale.
+4. **Test rapido**: apri nel browser `https://TUO-APP.vercel.app/api/health` — ti dice se manca la variabile, la tabella, o quante righe ci sono (`count`).
 
-### 3. Hosting su Vercel
-1. Vai su https://vercel.com → **Add New Project** → **Import** il repo GitHub.
-2. Framework Preset: **Other**. Root Directory: `./`.
-3. **Environment Variables** → aggiungi:
-   - Key: `DATABASE_URL`
-   - Value: la connection string di Neon (incollala intera, incluso `?sslmode=require`)
-   - Environment: seleziona **Production + Preview + Development**.
-4. **Deploy**. L'app sarà su `https://tuo-progetto.vercel.app`.
+Dopo aver salvato almeno una giornata con ☁️, verifica su Neon: SQL Editor → `SELECT * FROM workouts;`
 
-> Se ruoti la password su Neon, aggiorna `DATABASE_URL` su Vercel → **Settings → Environment Variables** → **Redeploy**.
+## Classifica community 🌍 (v2, opt-in anonimo)
 
-### 4. Test locale (opzionale)
-```powershell
-npm install -g vercel
-vercel link
-vercel env pull .env
-vercel dev
-# apri http://localhost:3000
-```
+I dati personali (serie, giorni, obiettivi) restano **solo in `localStorage`**. Sul cloud finiscono
+solo aggregati anonimi, e solo se l'utente entra in classifica dal tab **Rank**.
+
+- Tabella: `community_stats` (in `schema.sql` — rieseguilo nel SQL Editor di Neon per crearla)
+- `POST /api/publish` → upsert anonimo `{user_id, nickname, pb, totalAll, daysTrained, weekTotal, streakCur}`
+  (pubblicato in fire-and-forget a ogni salvataggio, senza rallentare l'app)
+- `GET /api/leaderboard?by=day|week|total|streak&user_id=...&limit=10` → top-10 + rank/percentili
+- Frontend: tab Rank con opt-in, nickname, 4 card percentile ("superi il P%"), top-10 per metrica,
+  posizione personale e cache locale quando offline

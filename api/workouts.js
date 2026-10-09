@@ -239,6 +239,52 @@ module.exports = async (req, res) => {
       })) });
     }
 
+    if (type === 'day' && req.method === 'POST') {
+      const categories = ['Flessioni', 'Addominali', 'Plank', 'Trazioni'];
+      const category = String(body.category || '');
+      const username = String(body.username || '').trim().slice(0, 30);
+      const country = String(body.country || '').slice(0, 40);
+      const date = String(body.date || '');
+      if (!categories.includes(category) || !username) {
+        return send(res, 400, { error: 'categoria e username obbligatori' });
+      }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || new Date(date + 'T00:00:00Z').toISOString().slice(0, 10) !== date) {
+        return send(res, 400, { error: 'data non valida' });
+      }
+      const utcTomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+      if (date > utcTomorrow) return send(res, 400, { error: 'Non puoi registrare nel futuro' });
+      if (!Array.isArray(body.entries) || body.entries.length > 200) {
+        return send(res, 400, { error: 'serie non valide' });
+      }
+      const unit = category === 'Plank' ? 'seconds' : 'reps';
+      const entries = body.entries.map((entry) => ({
+        variant: String((entry && entry.variant) || '').trim().slice(0, 40),
+        amount: Number(entry && entry.amount),
+      }));
+      if (entries.some((entry) => !entry.variant || !Number.isSafeInteger(entry.amount) || entry.amount <= 0 || entry.amount > 100000)) {
+        return send(res, 400, { error: 'ogni serie deve avere una variante e un valore valido' });
+      }
+
+      await client.query('BEGIN');
+      try {
+        await client.query('DELETE FROM workouts WHERE date=$1 AND category=$2 AND username=$3', [date, category, username]);
+        const saved = [];
+        for (const entry of entries) {
+          const exercise = category + ' · ' + entry.variant;
+          const result = await client.query(
+            'INSERT INTO workouts (exercise, category, variant, amount, unit, date, username, country) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
+            [exercise, category, entry.variant, entry.amount, unit, date, username, country]
+          );
+          saved.push(result.rows[0]);
+        }
+        await client.query('COMMIT');
+        return send(res, 200, { workouts: saved });
+      } catch (err) {
+        await client.query('ROLLBACK');
+        throw err;
+      }
+    }
+
     if (req.method === 'GET') {
       const { rows } = await client.query('SELECT * FROM workouts ORDER BY date DESC, created_at DESC LIMIT 1000');
       return send(res, 200, { workouts: rows });
