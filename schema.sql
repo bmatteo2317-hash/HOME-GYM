@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS workouts (
   country TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- category identifica Flessioni, Addominali, Plank o Trazioni; variant resta testo
+-- libero per mantenere compatibili le serie gia registrate e le varianti future.
 ALTER TABLE workouts ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT '';
 ALTER TABLE workouts ADD COLUMN IF NOT EXISTS variant TEXT NOT NULL DEFAULT '';
 ALTER TABLE workouts ADD COLUMN IF NOT EXISTS username TEXT NOT NULL DEFAULT '';
@@ -51,6 +53,7 @@ ALTER TABLE workouts DROP COLUMN IF EXISTS value_count;
 ALTER TABLE workouts DROP COLUMN IF EXISTS sets;
 CREATE INDEX IF NOT EXISTS idx_workouts_date ON workouts(date DESC);
 CREATE INDEX IF NOT EXISTS idx_workouts_user ON workouts(username);
+CREATE INDEX IF NOT EXISTS idx_workouts_user_category_date ON workouts(username, category, date DESC);
 
 CREATE TABLE IF NOT EXISTS profile (
   id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -65,6 +68,9 @@ CREATE TABLE IF NOT EXISTS profile (
 ALTER TABLE profile ADD COLUMN IF NOT EXISTS username TEXT NOT NULL DEFAULT '';
 ALTER TABLE profile ADD COLUMN IF NOT EXISTS country TEXT NOT NULL DEFAULT 'Italia';
 INSERT INTO profile (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
+-- Gli obiettivi giornalieri delle quattro miniapp sono preferenze locali
+-- (localStorage: hg_goal_<categoria>) e non richiedono una tabella cloud.
 
 -- Stanze private per classifiche tra amici
 CREATE TABLE IF NOT EXISTS rooms (

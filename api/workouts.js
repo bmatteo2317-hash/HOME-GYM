@@ -72,6 +72,7 @@ async function ensureSchema(client) {
     ALTER TABLE workouts DROP COLUMN IF EXISTS sets;
     CREATE INDEX IF NOT EXISTS idx_workouts_date ON workouts(date DESC);
     CREATE INDEX IF NOT EXISTS idx_workouts_user ON workouts(username);
+    CREATE INDEX IF NOT EXISTS idx_workouts_user_category_date ON workouts(username, category, date DESC);
     CREATE TABLE IF NOT EXISTS profile (
       id INTEGER PRIMARY KEY CHECK (id = 1),
       name TEXT NOT NULL DEFAULT 'Atleta',

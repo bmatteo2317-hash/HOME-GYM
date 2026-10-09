@@ -570,8 +570,11 @@ function renderGoalCard() {
   if (entryBox) entryBox.innerHTML = markup('entry');
   const pageBox = $('goalPageCard');
   if (pageBox) pageBox.innerHTML = markup('page');
+  const streakText = `🔥 Streak ${TYPE}: ${calcStreak(profile.username || null, TYPE)} giorni · globale: ${calcStreak(profile.username || null)} giorni`;
   const sl = $('streakLine');
-  if (sl) sl.textContent = `🔥 Streak ${TYPE}: ${calcStreak(profile.username || null, TYPE)} giorni · globale: ${calcStreak(profile.username || null)} giorni`;
+  if (sl) sl.textContent = streakText;
+  const goalStreak = $('goalStreakLine');
+  if (goalStreak) goalStreak.textContent = streakText;
 }
 function celKey() { return 'hg_cel_' + TYPE + ':' + isoOf(realToday()); }
 function maybeCelebrate() {
